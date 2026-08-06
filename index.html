@@ -599,21 +599,29 @@ function orderGroupMatches(matches){
 }
 
 function interleaveGroups(sequences){
-  // 条件1: 全体スケジュールで同グループが連続しないよう、残数が最も多いグループから優先的に選ぶ
-  const queues = sequences.map((seq,gi)=>({gi, items: seq.slice()}));
-  const result = [];
-  let lastGi = null;
-  let conflicts = 0;
-  while(true){
-    const avail = queues.filter(q=>q.items.length>0);
-    if(avail.length===0) break;
-    let candidates = avail.filter(q=>q.gi!==lastGi);
-    if(candidates.length===0){ candidates = avail; conflicts++; }
-    candidates.sort((a,b)=>b.items.length-a.items.length);
-    const chosen = candidates[0];
-    result.push({match: chosen.items.shift(), groupIdx: chosen.gi});
-    lastGi = chosen.gi;
+  // 条件1: 各グループの試合が偏らず全体にまんべんなく配置されるよう、
+  // まず各試合に「そのグループの中で何%地点にあるか」を割り当てて全体をマージする。
+  const items = [];
+  sequences.forEach((seq, gi)=>{
+    const n = seq.length;
+    seq.forEach((match, i)=>{
+      const pos = n>0 ? (i+0.5)/n : 0;
+      items.push({match, groupIdx: gi, pos});
+    });
+  });
+  items.sort((a,b)=> a.pos-b.pos || a.groupIdx-b.groupIdx);
+
+  // 軽い局所調整：同グループが連続した箇所だけ、直後の1件と入れ替えを試みる。
+  // 遠くから借りてこないことで、せっかくの均等な分布を崩さないようにする。
+  for(let i=1;i<items.length-1;i++){
+    if(items[i].groupIdx === items[i-1].groupIdx && items[i+1].groupIdx !== items[i-1].groupIdx){
+      const tmp = items[i]; items[i]=items[i+1]; items[i+1]=tmp;
+    }
   }
+  let conflicts = 0;
+  for(let i=1;i<items.length;i++) if(items[i].groupIdx===items[i-1].groupIdx) conflicts++;
+
+  const result = items.map(it=>({match: it.match, groupIdx: it.groupIdx}));
   return { order: result, conflicts };
 }
 
@@ -863,7 +871,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v3.1</div>
+        <div class="tag">Tournament Builder · v3.2</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -1057,9 +1065,11 @@ function renderSetup(){
     state.tournamentName = e.target.value;
   });
   const list = wrap.querySelector('#teamList');
-  const started = state.groups.length>0;
+  const started = state.matches.length>0;
   if(started){
-    list.appendChild(el(`<p class="small-note" style="margin-bottom:10px;">⚠ すでに予選グループが作成されているため、チームの削除はできません。参加できなくなったチームは「🚩 棄権管理」から棄権にしてください。</p>`));
+    list.appendChild(el(`<p class="small-note" style="margin-bottom:10px;">⚠ すでに予選の対戦表が作成されているため、チームの削除はできません。参加できなくなったチームは「🚩 棄権管理」から棄権にしてください。</p>`));
+  } else if(state.groups.length>0){
+    list.appendChild(el(`<p class="small-note" style="margin-bottom:10px;">📌 まだ対戦表は作られていないので、ここでチームを削除・追加できます（グループ分けは次の画面で組み直してください）。</p>`));
   }
   if(state.teams.length===0){
     list.appendChild(el(`<div class="empty-hint">まだチームが登録されていません。「＋ チームを追加」から始めましょう。</div>`));
@@ -1079,6 +1089,7 @@ function renderSetup(){
       if(removeBtn){
         removeBtn.addEventListener('click', ()=>{
           state.teams = state.teams.filter(x=>x.id!==t.id);
+          state.groups = state.groups.map(g=> g.filter(id=>id!==t.id));
           render();
         });
       }
