@@ -50,7 +50,9 @@
   .round-col{display:flex;flex-direction:column;justify-content:space-around;min-width:180px;position:relative;z-index:1;}
   .round-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);text-align:center;margin-bottom:8px;font-weight:700;}
   .bmatch{background:var(--paper);border:1.5px solid #DDE3ED;border-radius:10px;margin:8px 0;padding:8px 10px;position:relative;z-index:1;}
-  .bslot{padding:4px 2px;font-size:12.5px;font-weight:600;}
+  .bslot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 2px;font-size:12.5px;font-weight:600;}
+  .bslot .bname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+  .bslot .bscore{flex:none;min-width:26px;text-align:center;font-variant-numeric:tabular-nums;font-weight:800;background:var(--court);border-radius:6px;padding:1px 6px;font-size:12px;color:var(--navy);}
   .bslot.win{color:var(--win);font-weight:800;}
   .bslot.win::before{content:"✓ ";}
   .bslot.lose{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:0.7;}
@@ -279,38 +281,37 @@ function renderBracketPanel(){
     if(remaining===3) return '準々決勝';
     return `${i+1}回戦`;
   });
+  function scoreBadge(val){
+    if(val===null || val===undefined || val==='') return '';
+    return `<span class="bscore">${escapeHtml(String(val))}</span>`;
+  }
+  function buildMatchBox(m){
+    const w = m.winner;
+    const aName = m.a===null?'（未定）':(m.a==='BYE'?'― シード ―':teamName(data,m.a));
+    const bName = m.b===null?'（未定）':(m.b==='BYE'?'― シード ―':teamName(data,m.b));
+    const aCls = w ? (m.a===w?'win':'lose') : '';
+    const bCls = w ? (m.b===w?'win':'lose') : '';
+    const showScores = !m.forfeitWinner && m.a && m.b && m.a!=='BYE' && m.b!=='BYE';
+    const matchBox = el(`
+      <div class="bmatch">
+        <div class="bslot ${aCls}"><span class="bname">${escapeHtml(aName)}</span>${showScores?scoreBadge(m.scoreA):''}</div>
+        <div style="height:1px;background:#E5EAF2;margin:2px 0;"></div>
+        <div class="bslot ${bCls}"><span class="bname">${escapeHtml(bName)}</span>${showScores?scoreBadge(m.scoreB):''}</div>
+      </div>
+    `);
+    if(m.forfeitWinner){
+      matchBox.appendChild(el(`<p style="margin:6px 2px 0;font-size:11px;color:var(--lose);font-weight:700;">不戦勝・不戦敗</p>`));
+    }
+    return matchBox;
+  }
   rounds.forEach((round, ri)=>{
     const col = el(`<div class="round-col"><div class="round-title">${roundNames[ri]}</div></div>`);
-    round.forEach(m=>{
-      const w = m.winner;
-      const aName = m.a===null?'（未定）':(m.a==='BYE'?'― シード ―':teamName(data,m.a));
-      const bName = m.b===null?'（未定）':(m.b==='BYE'?'― シード ―':teamName(data,m.b));
-      const aCls = w ? (m.a===w?'win':'lose') : '';
-      const bCls = w ? (m.b===w?'win':'lose') : '';
-      const box2 = el(`
-        <div class="bmatch">
-          <div class="bslot ${aCls}">${escapeHtml(aName)}</div>
-          <div style="height:1px;background:#E5EAF2;margin:2px 0;"></div>
-          <div class="bslot ${bCls}">${escapeHtml(bName)}</div>
-        </div>
-      `);
-      col.appendChild(box2);
-    });
+    round.forEach(m=>{ col.appendChild(buildMatchBox(m)); });
     bracketEl.appendChild(col);
   });
   if(data.bracket.thirdPlaceMatch && (data.bracket.thirdPlaceMatch.a || data.bracket.thirdPlaceMatch.b)){
-    const m3 = data.bracket.thirdPlaceMatch;
     const col = el(`<div class="round-col"><div class="round-title">3位決定戦</div></div>`);
-    const w = m3.winner;
-    const aName = m3.a?teamName(data,m3.a):'（未定）', bName = m3.b?teamName(data,m3.b):'（未定）';
-    const aCls = w?(m3.a===w?'win':'lose'):'', bCls = w?(m3.b===w?'win':'lose'):'';
-    col.appendChild(el(`
-      <div class="bmatch">
-        <div class="bslot ${aCls}">${escapeHtml(aName)}</div>
-        <div style="height:1px;background:#E5EAF2;margin:2px 0;"></div>
-        <div class="bslot ${bCls}">${escapeHtml(bName)}</div>
-      </div>
-    `));
+    col.appendChild(buildMatchBox(data.bracket.thirdPlaceMatch));
     bracketEl.appendChild(col);
   }
   wrap.appendChild(bracketEl);
