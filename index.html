@@ -1242,7 +1242,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.4</div>
+        <div class="tag">Tournament Builder · v5.5</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2386,7 +2386,7 @@ function drawBracketConnectors(panelEl){
   svg.setAttribute('class','bracket-lines');
   svg.setAttribute('width', container.scrollWidth);
   svg.setAttribute('height', container.scrollHeight);
-  const GREEN = '#1F9260', GRAY = '#DCE2EA';
+  const GREEN = '#1F9260', GRAY = '#AAB4C6';
   function drawPath(d, color, width){
     const path = document.createElementNS(svgNS,'path');
     path.setAttribute('d', d);
@@ -2439,12 +2439,15 @@ function drawBracketConnectors(panelEl){
       // チームBの枠から伸びる線
       drawPath(`M ${startX} ${bY} H ${mergeX}`, colorB, widthB);
 
+      // 縦の合流線は上半分・下半分をそれぞれのチームの色で分ける
+      // （片方が勝っても、負けた側の位置まで色付きの線が伸びないようにする）
+      drawPath(`M ${mergeX} ${aY} V ${mergeY}`, colorA, widthA);
+      drawPath(`M ${mergeX} ${mergeY} V ${bY}`, colorB, widthB);
+
       const advanced = !!m.winner;
       const trunkColor = advanced ? GREEN : GRAY;
       const trunkWidth = advanced ? 4 : 1.5;
-      // 2本の合流点をつなぐ縦線（勝者が決まっていればその色）
-      drawPath(`M ${mergeX} ${aY} V ${bY}`, trunkColor, trunkWidth);
-      // 合流後、次のラウンドへ向かう線
+      // 合流後、次のラウンドへ向かう線（勝者が決まっていればその色）
       drawPath(`M ${mergeX} ${mergeY} H ${(mergeX+endX)/2} V ${endY} H ${endX}`, trunkColor, trunkWidth);
     });
   }

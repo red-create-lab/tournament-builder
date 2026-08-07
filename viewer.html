@@ -326,7 +326,7 @@ function drawBracketConnectors(container){
   svg.setAttribute('class','bracket-lines');
   svg.setAttribute('width', container.scrollWidth);
   svg.setAttribute('height', container.scrollHeight);
-  const GREEN = '#1F9260', GRAY = '#DCE2EA';
+  const GREEN = '#1F9260', GRAY = '#AAB4C6';
   function drawPath(d, color, width){
     const path = document.createElementNS(svgNS,'path');
     path.setAttribute('d', d);
@@ -375,10 +375,12 @@ function drawBracketConnectors(container){
       drawPath(`M ${startX} ${aY} H ${mergeX}`, colorA, widthA);
       drawPath(`M ${startX} ${bY} H ${mergeX}`, colorB, widthB);
 
+      drawPath(`M ${mergeX} ${aY} V ${mergeY}`, colorA, widthA);
+      drawPath(`M ${mergeX} ${mergeY} V ${bY}`, colorB, widthB);
+
       const advanced = !!m.winner;
       const trunkColor = advanced ? GREEN : GRAY;
       const trunkWidth = advanced ? 4 : 1.5;
-      drawPath(`M ${mergeX} ${aY} V ${bY}`, trunkColor, trunkWidth);
       drawPath(`M ${mergeX} ${mergeY} H ${(mergeX+endX)/2} V ${endY} H ${endX}`, trunkColor, trunkWidth);
     });
   }
