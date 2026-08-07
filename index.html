@@ -1242,7 +1242,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.2</div>
+        <div class="tag">Tournament Builder · v5.3</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2386,6 +2386,16 @@ function drawBracketConnectors(panelEl){
   svg.setAttribute('class','bracket-lines');
   svg.setAttribute('width', container.scrollWidth);
   svg.setAttribute('height', container.scrollHeight);
+  const GREEN = '#1F9260', GRAY = '#DCE2EA';
+  function drawPath(d, color, width){
+    const path = document.createElementNS(svgNS,'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', width);
+    path.setAttribute('stroke-linecap','round');
+    svg.appendChild(path);
+  }
 
   const rounds = state.bracket.rounds;
   const roundCols = container.querySelectorAll('.round-col');
@@ -2399,21 +2409,38 @@ function drawBracketConnectors(panelEl){
       const box = boxes[mi];
       const nextBox = nextBoxes[Math.floor(mi/2)];
       if(!box || !nextBox) return;
+      const slots = box.querySelectorAll('.bslot');
+      if(slots.length<2) return;
+      const slotARect = slots[0].getBoundingClientRect();
+      const slotBRect = slots[1].getBoundingClientRect();
       const boxRect = box.getBoundingClientRect();
       const nextRect = nextBox.getBoundingClientRect();
+
       const startX = boxRect.right - containerRect.left;
-      const startY = boxRect.top + boxRect.height/2 - containerRect.top;
+      const aY = slotARect.top + slotARect.height/2 - containerRect.top;
+      const bY = slotBRect.top + slotBRect.height/2 - containerRect.top;
+      const mergeX = startX + 16; // 各チームの枠から出た線が合流するX位置
+      const mergeY = (aY+bY)/2;
       const endX = nextRect.left - containerRect.left;
       const endY = nextRect.top + nextRect.height/2 - containerRect.top;
-      const midX = (startX+endX)/2;
-      const advanced = !!m.winner; // this match's result has decided who moves on
-      const path = document.createElementNS(svgNS,'path');
-      path.setAttribute('d', `M ${startX} ${startY} H ${midX} V ${endY} H ${endX}`);
-      path.setAttribute('fill','none');
-      path.setAttribute('stroke', advanced ? '#1F9260' : '#DCE2EA');
-      path.setAttribute('stroke-width', advanced ? '4' : '1.5');
-      path.setAttribute('stroke-linecap','round');
-      svg.appendChild(path);
+
+      const colorA = (m.winner && m.winner===m.a) ? GREEN : GRAY;
+      const colorB = (m.winner && m.winner===m.b) ? GREEN : GRAY;
+      const widthA = (m.winner && m.winner===m.a) ? 4 : 1.5;
+      const widthB = (m.winner && m.winner===m.b) ? 4 : 1.5;
+
+      // チームAの枠から伸びる線
+      drawPath(`M ${startX} ${aY} H ${mergeX}`, colorA, widthA);
+      // チームBの枠から伸びる線
+      drawPath(`M ${startX} ${bY} H ${mergeX}`, colorB, widthB);
+
+      const advanced = !!m.winner;
+      const trunkColor = advanced ? GREEN : GRAY;
+      const trunkWidth = advanced ? 4 : 1.5;
+      // 2本の合流点をつなぐ縦線（勝者が決まっていればその色）
+      drawPath(`M ${mergeX} ${aY} V ${bY}`, trunkColor, trunkWidth);
+      // 合流後、次のラウンドへ向かう線
+      drawPath(`M ${mergeX} ${mergeY} H ${(mergeX+endX)/2} V ${endY} H ${endX}`, trunkColor, trunkWidth);
     });
   }
   container.insertBefore(svg, container.firstChild);

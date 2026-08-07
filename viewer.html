@@ -179,7 +179,9 @@ function render(){
   }
 
   if((viewerTab==='bracket' || !hasPrelim) && hasBracket){
-    app.appendChild(renderBracketPanel());
+    const bracketPanel = renderBracketPanel();
+    app.appendChild(bracketPanel);
+    drawBracketConnectors(bracketPanel.querySelector('.bracket'));
     const champ = getFinalStandings();
     if(champ) app.appendChild(renderChampionBanner(champ));
   } else if(hasPrelim){
@@ -314,6 +316,69 @@ function renderBracketPanel(){
   wrap.appendChild(bracketEl);
   box.appendChild(wrap);
   return box;
+}
+
+function drawBracketConnectors(container){
+  if(!container) return;
+  const containerRect = container.getBoundingClientRect();
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('class','bracket-lines');
+  svg.setAttribute('width', container.scrollWidth);
+  svg.setAttribute('height', container.scrollHeight);
+  const GREEN = '#1F9260', GRAY = '#DCE2EA';
+  function drawPath(d, color, width){
+    const path = document.createElementNS(svgNS,'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', width);
+    path.setAttribute('stroke-linecap','round');
+    svg.appendChild(path);
+  }
+  const rounds = data.bracket.rounds;
+  const roundCols = container.querySelectorAll('.round-col');
+  for(let ri=0; ri<rounds.length-1; ri++){
+    const col = roundCols[ri];
+    const nextCol = roundCols[ri+1];
+    if(!col || !nextCol) continue;
+    const boxes = col.querySelectorAll('.bmatch');
+    const nextBoxes = nextCol.querySelectorAll('.bmatch');
+    rounds[ri].forEach((m, mi)=>{
+      const box = boxes[mi];
+      const nextBox = nextBoxes[Math.floor(mi/2)];
+      if(!box || !nextBox) return;
+      const slots = box.querySelectorAll('.bslot');
+      if(slots.length<2) return;
+      const slotARect = slots[0].getBoundingClientRect();
+      const slotBRect = slots[1].getBoundingClientRect();
+      const boxRect = box.getBoundingClientRect();
+      const nextRect = nextBox.getBoundingClientRect();
+
+      const startX = boxRect.right - containerRect.left;
+      const aY = slotARect.top + slotARect.height/2 - containerRect.top;
+      const bY = slotBRect.top + slotBRect.height/2 - containerRect.top;
+      const mergeX = startX + 16;
+      const mergeY = (aY+bY)/2;
+      const endX = nextRect.left - containerRect.left;
+      const endY = nextRect.top + nextRect.height/2 - containerRect.top;
+
+      const colorA = (m.winner && m.winner===m.a) ? GREEN : GRAY;
+      const colorB = (m.winner && m.winner===m.b) ? GREEN : GRAY;
+      const widthA = (m.winner && m.winner===m.a) ? 4 : 1.5;
+      const widthB = (m.winner && m.winner===m.b) ? 4 : 1.5;
+
+      drawPath(`M ${startX} ${aY} H ${mergeX}`, colorA, widthA);
+      drawPath(`M ${startX} ${bY} H ${mergeX}`, colorB, widthB);
+
+      const advanced = !!m.winner;
+      const trunkColor = advanced ? GREEN : GRAY;
+      const trunkWidth = advanced ? 4 : 1.5;
+      drawPath(`M ${mergeX} ${aY} V ${bY}`, trunkColor, trunkWidth);
+      drawPath(`M ${mergeX} ${mergeY} H ${(mergeX+endX)/2} V ${endY} H ${endX}`, trunkColor, trunkWidth);
+    });
+  }
+  container.insertBefore(svg, container.firstChild);
 }
 
 function getFinalStandings(){
