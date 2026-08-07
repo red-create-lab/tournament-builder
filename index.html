@@ -1203,8 +1203,12 @@ function renderBoard(){
     ? `<div class="row" style="gap:6px;align-items:center;">
          <span style="font-size:11.5px;color:#C7D5E8;">👤 ${escapeHtml(state.currentUser.name||state.currentUser.email||'')}</span>
          <button class="btn-ghost btn-sm" id="signOutBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);">ログアウト</button>
+         <button class="btn-ghost btn-sm" id="manualBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);" title="マニュアル">📖<span class="btn-label"> マニュアル</span></button>
        </div>`
-    : `<button class="btn-amber btn-sm" id="signInBtn">Googleでログイン</button>`;
+    : `<div class="row" style="gap:6px;align-items:center;">
+         <button class="btn-amber btn-sm" id="signInBtn">Googleでログイン</button>
+         <button class="btn-ghost btn-sm" id="manualBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);" title="マニュアル">📖<span class="btn-label"> マニュアル</span></button>
+       </div>`;
 
   const roomChip = (connected && state.roomId)
     ? `<div class="row" style="gap:6px;align-items:center;">
@@ -1232,9 +1236,6 @@ function renderBoard(){
           <button class="btn-ghost btn-sm" id="snsImageBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);" ${state.teams.length===0?'disabled':''} title="SNS用画像を保存">
             📸<span class="btn-label"> 画像を保存</span>
           </button>
-          <button class="btn-ghost btn-sm" id="manualBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);" title="マニュアル">
-            📖<span class="btn-label"> マニュアル</span>
-          </button>
         </div>
         <div class="steps">${stepsHtml}</div>
   ` : '';
@@ -1242,7 +1243,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.5</div>
+        <div class="tag">Tournament Builder · v5.6</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -1258,6 +1259,9 @@ function renderBoard(){
   if(signInBtn) signInBtn.addEventListener('click', signInWithGoogle);
   const signOutBtn = board.querySelector('#signOutBtn');
   if(signOutBtn) signOutBtn.addEventListener('click', signOutUser);
+  board.querySelector('#manualBtn').addEventListener('click', ()=>{
+    window.open('manual.html', '_blank');
+  });
   const copyBtn = board.querySelector('#copyRoomLinkBtn');
   if(copyBtn) copyBtn.addEventListener('click', ()=>{
     navigator.clipboard.writeText(location.href).then(()=>{
@@ -1289,9 +1293,6 @@ function renderBoard(){
   if(!snsImageBtn.disabled){
     snsImageBtn.addEventListener('click', ()=>{ showSnsImageModal(); });
   }
-  board.querySelector('#manualBtn').addEventListener('click', ()=>{
-    window.open('manual.html', '_blank');
-  });
   const resetBtn = board.querySelector('#resetTournamentBtn');
   if(!resetBtn.disabled){
     resetBtn.addEventListener('click', ()=>{
