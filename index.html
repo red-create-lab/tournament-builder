@@ -16,6 +16,10 @@
 <meta name="apple-mobile-web-app-title" content="トーナメント">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --navy:#12213A;
@@ -75,6 +79,9 @@
   .btn-primary:disabled{background:#C4CCDA;cursor:not-allowed;}
   .btn-ghost:disabled{opacity:0.4;cursor:not-allowed;}
   .btn-amber{background:var(--amber);color:var(--navy);padding:11px 22px;}
+  body.readonly-mode #app input,
+  body.readonly-mode #app select{pointer-events:none;opacity:0.55;background:#F0F2F6;}
+  body.readonly-mode #app .team-chip [data-remove]{display:none;}
   .btn-amber:hover{filter:brightness(1.06);}
   .btn-ghost{background:transparent;color:var(--navy);padding:9px 16px;border:1.5px solid #C7D0E0;}
   .btn-ghost:hover{background:var(--court);}
@@ -212,10 +219,39 @@ let state = {
   savedThisTournament: false,// 今の大会をすでに履歴保存したか
   holdThirdPlace: false,     // 3位決定戦を行うか
   withdrawnTeams: {},        // teamId -> true（棄権済み）
+  roomId: null,              // 大会の部屋ID（Firestore同期用・編集用）
+  roomStage: 'room-select',  // room-select | connecting | connected | error
+  currentUser: null,         // {uid, name, email, photoURL} ログイン中の運営者
+  viewToken: null,           // 閲覧用サイトのトークン（編集用とは別の合言葉）
 };
 let nextTeamId = 1;
 let nextMatchId = 1;
 
+/* ============================= FIREBASE ============================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCLcr6_JHz_5HgiwUNVGJ9nJKg0nvY1UNY",
+  authDomain: "tournament-builder-65c70.firebaseapp.com",
+  projectId: "tournament-builder-65c70",
+  storageBucket: "tournament-builder-65c70.firebasestorage.app",
+  messagingSenderId: "1098639992944",
+  appId: "1:1098639992944:web:9625f6ddf65cb5f1c5ecb5"
+};
+let fbApp = null, fbAuth = null, fbDb = null, googleProvider = null;
+let firebaseReady = false;
+function initFirebase(){
+  try{
+    if(typeof firebase==='undefined') return false;
+    fbApp = firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+    fbDb = firebase.firestore();
+    googleProvider = new firebase.auth.GoogleAuthProvider();
+    firebaseReady = true;
+    return true;
+  }catch(e){
+    console.error('Firebase init failed', e);
+    return false;
+  }
+}
 /* ============================= HELPERS ============================= */
 function teamName(id){
   if(id === 'BYE' || id === null || id === undefined) return null;
@@ -271,6 +307,153 @@ async function persistHistory(list){
 async function initHistory(){
   state.history = await loadHistory();
   render();
+}
+
+/* ============================= 部屋（大会）ID・ログイン・Firestore同期 ============================= */
+const SYNCED_FIELDS = [
+  'tournamentName','teams','numGroups','groups','matches','manualOrder',
+  'advanceChecked','advanceOrder','bracket','schedule','scheduleWarnings',
+  'savedThisTournament','holdThirdPlace','withdrawnTeams','nextTeamId','nextMatchId',
+  'viewToken'
+];
+function genRoomId(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0,O,1,I)を除外
+  let id = '';
+  for(let i=0;i<6;i++) id += chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+function genViewToken(){
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  let id = '';
+  for(let i=0;i<10;i++) id += chars[Math.floor(Math.random()*chars.length)];
+  return id;
+}
+function getRoomIdFromUrl(){
+  const params = new URLSearchParams(location.search);
+  return params.get('room');
+}
+function setRoomIdInUrl(roomId){
+  const url = new URL(location.href);
+  url.searchParams.set('room', roomId);
+  history.replaceState(null, '', url.toString());
+}
+function viewerUrlFor(viewToken){
+  const url = new URL('viewer.html', location.href);
+  url.searchParams.set('v', viewToken);
+  return url.toString();
+}
+let unsubscribeRoom = null;
+let suppressNextWrite = false;
+let firestoreSaveTimer = null;
+
+function snapshotSyncedState(){
+  const obj = {};
+  SYNCED_FIELDS.forEach(k=> obj[k] = state[k]);
+  obj.nextTeamId = nextTeamId;
+  obj.nextMatchId = nextMatchId;
+  obj.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+  obj.updatedBy = state.currentUser ? (state.currentUser.name || state.currentUser.email) : '不明';
+  return obj;
+}
+function scheduleFirestoreSave(){
+  if(!state.roomId || !fbDb || !state.currentUser) return; // 未ログインは書き込みしない
+  if(suppressNextWrite){ suppressNextWrite = false; return; }
+  if(firestoreSaveTimer) clearTimeout(firestoreSaveTimer);
+  firestoreSaveTimer = setTimeout(()=>{
+    const payload = snapshotSyncedState();
+    fbDb.collection('tournaments').doc(state.roomId).set(payload, {merge:true})
+      .then(()=>{
+        const indicator = document.getElementById('autosaveIndicator');
+        if(indicator){
+          const t = new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+          indicator.textContent = `☁️ 同期済み ${t}`;
+        }
+        if(state.viewToken){
+          fbDb.collection('public_view').doc(state.viewToken).set(payload, {merge:true}).catch(err=>console.error('mirror save failed', err));
+        }
+      })
+      .catch(err=>{
+        console.error('Firestore save failed', err);
+        showToast('⚠ 同期に失敗しました（通信をご確認ください）');
+      });
+  }, 500);
+}
+function applyRemoteSnapshot(data){
+  suppressNextWrite = true;
+  SYNCED_FIELDS.forEach(k=>{
+    if(k==='nextTeamId'||k==='nextMatchId') return;
+    if(data[k]!==undefined) state[k] = data[k];
+  });
+  if(data.nextTeamId!==undefined) nextTeamId = data.nextTeamId;
+  if(data.nextMatchId!==undefined) nextMatchId = data.nextMatchId;
+  render();
+}
+async function createNewRoom(){
+  const roomId = genRoomId();
+  const viewToken = genViewToken();
+  setRoomIdInUrl(roomId);
+  state.roomId = roomId;
+  state.viewToken = viewToken;
+  const payload = snapshotSyncedState();
+  try{
+    await fbDb.collection('tournaments').doc(roomId).set(payload);
+    await fbDb.collection('public_view').doc(viewToken).set(payload);
+    connectToRoom(roomId);
+  }catch(e){
+    console.error(e);
+    showAlertModal('大会の作成に失敗しました。ログイン状態と通信環境を確認してください。');
+  }
+}
+function connectToRoom(roomId){
+  state.roomId = roomId;
+  state.roomStage = 'connecting';
+  setRoomIdInUrl(roomId);
+  render();
+  if(unsubscribeRoom) unsubscribeRoom();
+  unsubscribeRoom = fbDb.collection('tournaments').doc(roomId).onSnapshot(
+    doc=>{
+      if(!doc.exists){
+        state.roomStage = 'error';
+        render();
+        return;
+      }
+      state.roomStage = 'connected';
+      applyRemoteSnapshot(doc.data());
+    },
+    err=>{
+      console.error('onSnapshot error', err);
+      state.roomStage = 'error';
+      render();
+    }
+  );
+}
+function leaveRoom(){
+  if(unsubscribeRoom){ unsubscribeRoom(); unsubscribeRoom = null; }
+  state.roomId = null;
+  state.roomStage = 'room-select';
+  const url = new URL(location.href);
+  url.searchParams.delete('room');
+  history.replaceState(null, '', url.toString());
+  render();
+}
+async function signInWithGoogle(){
+  if(!firebaseReady){ showAlertModal('通信環境を確認してもう一度お試しください。'); return; }
+  try{
+    await fbAuth.signInWithPopup(googleProvider);
+  }catch(e){
+    console.error(e);
+    showAlertModal('ログインに失敗しました。もう一度お試しください。');
+  }
+}
+async function signOutUser(){
+  try{ await fbAuth.signOut(); }catch(e){ console.error(e); }
+}
+function initAuthListener(){
+  if(!fbAuth) return;
+  fbAuth.onAuthStateChanged(user=>{
+    state.currentUser = user ? {uid:user.uid, name:user.displayName, email:user.email, photoURL:user.photoURL} : null;
+    render();
+  });
 }
 
 /* ============================= 進行中データの自動保存 ============================= */
@@ -780,6 +963,44 @@ function showAlertModal(message){
   overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
 }
 
+function showViewerLinkModal(){
+  if(!state.viewToken){
+    showAlertModal('この大会には参加者用リンクがまだありません（古い形式の大会の可能性があります）。');
+    return;
+  }
+  const url = viewerUrlFor(state.viewToken);
+  const overlay = el(`<div style="position:fixed;inset:0;background:rgba(18,33,58,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;"></div>`);
+  const box = el(`
+    <div style="background:#fff;border-radius:14px;padding:26px;max-width:360px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,0.25);text-align:center;">
+      <h3 style="margin:0 0 4px;font-size:16px;font-weight:800;color:var(--navy);">📣 参加者用リンク・QR</h3>
+      <p style="margin:0 0 16px;font-size:12.5px;color:var(--sub);">選手・観客にはこちらを共有してください。ログイン不要で、見るだけの画面が開きます。</p>
+      <div id="qrHolder" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+      <p style="font-size:11.5px;word-break:break-all;color:var(--sub);background:var(--court);border-radius:8px;padding:8px 10px;margin-bottom:16px;">${escapeHtml(url)}</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn-ghost" id="copyViewerLinkBtn">🔗 リンクをコピー</button>
+        <button class="btn-primary" data-role="close">閉じる</button>
+      </div>
+    </div>
+  `);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  if(typeof QRCode!=='undefined'){
+    new QRCode(box.querySelector('#qrHolder'), {text:url, width:180, height:180, colorDark:'#12213A', colorLight:'#ffffff'});
+  } else {
+    box.querySelector('#qrHolder').textContent = '（QRコードを読み込めませんでした。通信環境をご確認ください）';
+  }
+  function close(){ if(overlay.parentNode) document.body.removeChild(overlay); }
+  box.querySelector('[data-role="close"]').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  box.querySelector('#copyViewerLinkBtn').addEventListener('click', ()=>{
+    navigator.clipboard.writeText(url).then(()=>{
+      showToast('🔗 参加者用リンクをコピーしました');
+    }).catch(()=>{
+      showAlertModal(`このリンクをコピーしてください：\n${url}`);
+    });
+  });
+}
+
 /* ---- 軽い通知（トースト） ---- */
 let toastContainer = null;
 function showToast(message){
@@ -829,19 +1050,69 @@ function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
   app.appendChild(renderBoard());
-  if(state.stage==='setup') app.appendChild(renderSetup());
-  if(state.stage==='groups') app.appendChild(renderGroups());
-  if(state.stage==='prelim') app.appendChild(renderPrelim());
-  if(state.stage==='advance') app.appendChild(renderAdvance());
-  if(state.stage==='history') app.appendChild(renderHistory());
-  if(state.stage==='withdraw') app.appendChild(renderWithdraw());
-  if(state.stage==='bracket'){
-    const panel = renderBracket();
-    app.appendChild(panel);
-    drawBracketConnectors(panel);
+  if(state.roomStage==='room-select'){
+    app.appendChild(renderRoomSelect());
+  } else if(state.roomStage==='connecting'){
+    app.appendChild(renderRoomConnecting());
+  } else if(state.roomStage==='error'){
+    app.appendChild(renderRoomError());
+  } else {
+    if(state.stage==='setup') app.appendChild(renderSetup());
+    if(state.stage==='groups') app.appendChild(renderGroups());
+    if(state.stage==='prelim') app.appendChild(renderPrelim());
+    if(state.stage==='advance') app.appendChild(renderAdvance());
+    if(state.stage==='history') app.appendChild(renderHistory());
+    if(state.stage==='withdraw') app.appendChild(renderWithdraw());
+    if(state.stage==='bracket'){
+      const panel = renderBracket();
+      app.appendChild(panel);
+      drawBracketConnectors(panel);
+    }
   }
-  scheduleAutosave();
+  document.body.classList.toggle('readonly-mode', state.roomStage==='connected' && !state.currentUser);
+  if(state.roomStage==='connected'){
+    scheduleFirestoreSave();
+  }
   restoreUiState(ui);
+}
+function renderRoomSelect(){
+  const wrap = el(`
+    <div class="panel">
+      <h2>大会に接続</h2>
+      <p class="desc">新しい大会を作るか、すでにある大会の参加コードを入力してください。</p>
+      <div class="row" style="margin-bottom:18px;">
+        <button class="btn-primary" id="createRoomBtn">＋ 新しい大会を作る</button>
+      </div>
+      <div class="row" style="align-items:center;gap:10px;">
+        <input type="text" id="joinRoomInput" placeholder="参加コード（例：AB3XQ9）" style="width:200px;text-transform:uppercase;">
+        <button class="btn-ghost" id="joinRoomBtn">参加コードで開く</button>
+      </div>
+      ${!state.currentUser ? '<p class="small-note" style="margin-top:16px;">⚠ 大会を新しく作るには、右上から先にログインしてください。参加コードを入力して見るだけなら、ログイン不要です。</p>' : ''}
+    </div>
+  `);
+  const createBtn = wrap.querySelector('#createRoomBtn');
+  if(!state.currentUser) createBtn.disabled = true;
+  createBtn.addEventListener('click', ()=>{ createNewRoom(); });
+  wrap.querySelector('#joinRoomBtn').addEventListener('click', ()=>{
+    const val = wrap.querySelector('#joinRoomInput').value.trim().toUpperCase();
+    if(!val){ showAlertModal('参加コードを入力してください。'); return; }
+    connectToRoom(val);
+  });
+  return wrap;
+}
+function renderRoomConnecting(){
+  return el(`<div class="panel"><p style="text-align:center;color:var(--sub);padding:30px 0;">接続しています…</p></div>`);
+}
+function renderRoomError(){
+  const wrap = el(`
+    <div class="panel">
+      <h2>接続できませんでした</h2>
+      <p class="desc">参加コード「${escapeHtml(state.roomId||'')}」の大会が見つかりませんでした。コードを確認してもう一度お試しください。</p>
+      <button class="btn-ghost" id="backToRoomSelect">← やり直す</button>
+    </div>
+  `);
+  wrap.querySelector('#backToRoomSelect').addEventListener('click', leaveRoom);
+  return wrap;
 }
 let renderDebounceTimer = null;
 function scheduleRender(){
@@ -867,15 +1138,26 @@ function renderBoard(){
     if(i<curIdx) cls+=' done'; else if(i===curIdx) cls+=' active';
     return `<div class="${cls}">${label}</div>`;
   }).join('');
-  const titleText = (state.stage!=='history' && state.stage!=='withdraw') && state.tournamentName.trim() ? state.tournamentName.trim() : '大会組み合わせビルダー';
-  const board = el(`
-    <div class="board">
-      <div>
-        <div class="tag">Tournament Builder · v3.2</div>
-        <h1>${escapeHtml(titleText)}</h1>
-        <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+  const connected = state.roomStage==='connected';
+  const titleText = connected && (state.stage!=='history' && state.stage!=='withdraw') && state.tournamentName.trim() ? state.tournamentName.trim() : '大会組み合わせビルダー';
+
+  const userChip = state.currentUser
+    ? `<div class="row" style="gap:6px;align-items:center;">
+         <span style="font-size:11.5px;color:#C7D5E8;">👤 ${escapeHtml(state.currentUser.name||state.currentUser.email||'')}</span>
+         <button class="btn-ghost btn-sm" id="signOutBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);">ログアウト</button>
+       </div>`
+    : `<button class="btn-amber btn-sm" id="signInBtn">Googleでログイン</button>`;
+
+  const roomChip = (connected && state.roomId)
+    ? `<div class="row" style="gap:6px;align-items:center;">
+         <span style="font-size:11.5px;color:#C7D5E8;">編集コード：<b style="letter-spacing:.05em;">${escapeHtml(state.roomId)}</b></span>
+         <button class="btn-ghost btn-sm" id="copyRoomLinkBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);">🔗 編集用リンク</button>
+         <button class="btn-ghost btn-sm" id="viewerLinkBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);">📣 参加者用リンク・QR</button>
+         <button class="btn-ghost btn-sm" id="leaveRoomBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);">別の大会へ</button>
+       </div>`
+    : '';
+
+  const actionButtonsHtml = connected ? `
         <div class="row header-btn-row" style="gap:8px;">
           <button class="btn-ghost btn-sm" id="exportExcelBtn" style="background:rgba(255,255,255,0.08);color:#fff;border-color:rgba(255,255,255,0.28);" ${state.teams.length===0?'disabled':''} title="Excelで出力">
             📊<span class="btn-label"> Excelで出力</span>
@@ -897,9 +1179,42 @@ function renderBoard(){
           </button>
         </div>
         <div class="steps">${stepsHtml}</div>
+  ` : '';
+
+  const board = el(`
+    <div class="board">
+      <div>
+        <div class="tag">Tournament Builder · v5.0</div>
+        <h1>${escapeHtml(titleText)}</h1>
+        <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        ${userChip}
+        ${roomChip}
+        ${actionButtonsHtml}
       </div>
     </div>
   `);
+
+  const signInBtn = board.querySelector('#signInBtn');
+  if(signInBtn) signInBtn.addEventListener('click', signInWithGoogle);
+  const signOutBtn = board.querySelector('#signOutBtn');
+  if(signOutBtn) signOutBtn.addEventListener('click', signOutUser);
+  const copyBtn = board.querySelector('#copyRoomLinkBtn');
+  if(copyBtn) copyBtn.addEventListener('click', ()=>{
+    navigator.clipboard.writeText(location.href).then(()=>{
+      showToast('🔗 リンクをコピーしました');
+    }).catch(()=>{
+      showAlertModal(`このリンクをコピーしてください：\n${location.href}`);
+    });
+  });
+  const leaveBtn = board.querySelector('#leaveRoomBtn');
+  if(leaveBtn) leaveBtn.addEventListener('click', leaveRoom);
+  const viewerLinkBtn = board.querySelector('#viewerLinkBtn');
+  if(viewerLinkBtn) viewerLinkBtn.addEventListener('click', showViewerLinkModal);
+
+  if(!connected) return board;
+
   const exportBtn = board.querySelector('#exportExcelBtn');
   if(!exportBtn.disabled) exportBtn.addEventListener('click', ()=>{
     const original = exportBtn.innerHTML;
@@ -922,6 +1237,7 @@ function renderBoard(){
   const resetBtn = board.querySelector('#resetTournamentBtn');
   if(!resetBtn.disabled){
     resetBtn.addEventListener('click', ()=>{
+      if(!requireEditPermission()) return;
       showConfirmModal('現在の大会データ（チーム・予選結果・決勝トーナメント）をすべて消して、新しい大会を始めます。保存済みの大会履歴は消えません。よろしいですか？', resetTournament, {okLabel:'新しい大会を始める'});
     });
   }
@@ -947,6 +1263,13 @@ function renderBoard(){
     render();
   });
   return board;
+}
+function requireEditPermission(){
+  if(!state.currentUser){
+    showAlertModal('編集にはログインが必要です。右上の「Googleでログイン」からログインしてください。');
+    return false;
+  }
+  return true;
 }
 
 /* ---- STAGE: withdraw (棄権管理) ---- */
@@ -980,6 +1303,7 @@ function renderWithdraw(){
         ? `<button class="btn-ghost btn-sm">取り消す</button>`
         : `<button class="btn-danger">棄権にする</button>`);
       btn.addEventListener('click', ()=>{
+        if(!requireEditPermission()) return;
         if(withdrawn){
           undoWithdrawal(t.id);
         } else {
@@ -1088,6 +1412,7 @@ function renderSetup(){
       const removeBtn = row.querySelector('[data-remove]');
       if(removeBtn){
         removeBtn.addEventListener('click', ()=>{
+          if(!requireEditPermission()) return;
           state.teams = state.teams.filter(x=>x.id!==t.id);
           state.groups = state.groups.map(g=> g.filter(id=>id!==t.id));
           render();
@@ -1097,6 +1422,7 @@ function renderSetup(){
     });
   }
   wrap.querySelector('#addTeamBtn').addEventListener('click', ()=>{
+    if(!requireEditPermission()) return;
     state.teams.push({id: nextTeamId++, name: `チーム${state.teams.length+1}`});
     render();
   });
@@ -1194,6 +1520,7 @@ function renderGroups(){
 
   wrap.querySelector('#backToSetup').addEventListener('click', ()=>{ state.stage='setup'; render(); });
   wrap.querySelector('#toPrelimBtn').addEventListener('click', ()=>{
+    if(!requireEditPermission()) return;
     const hasResults = state.matches.some(m=> (m.scoreA!==null&&m.scoreA!=='') || (m.scoreB!==null&&m.scoreB!=='') || m.forfeitWinner);
     const proceed = ()=>{ generatePrelimMatches(); state.stage='prelim'; render(); };
     if(hasResults){
@@ -1494,6 +1821,7 @@ function renderAdvance(){
   goBtn.disabled = checkedCount<2;
   goBtn.addEventListener('click', ()=>{
     if(checkedCount<2) return;
+    if(!requireEditPermission()) return;
     generateBracket();
     state.stage='bracket';
     render();
@@ -1975,8 +2303,9 @@ function renderBracket(){
     champArea.appendChild(banner);
   }
 
-  wrap.querySelector('#toggleEdit').addEventListener('click', ()=>{ bracketEditMode=!bracketEditMode; render(); });
+  wrap.querySelector('#toggleEdit').addEventListener('click', ()=>{ if(!requireEditPermission()) return; bracketEditMode=!bracketEditMode; render(); });
   wrap.querySelector('#reseedBtn').addEventListener('click', ()=>{
+    if(!requireEditPermission()) return;
     const hasProgress = state.bracket.rounds.some(round=> round.some(m=> matchWinner(m) && m.a!=='BYE' && m.b!=='BYE'));
     const proceed = ()=>{ generateBracket(); render(); showToast('🔀 シードを組み直しました'); };
     if(hasProgress){
@@ -2100,7 +2429,18 @@ document.addEventListener('keydown', function(e){
 
 render();
 initHistory();
-initAutosaveCheck();
+
+if(initFirebase()){
+  initAuthListener();
+  const urlRoom = getRoomIdFromUrl();
+  if(urlRoom){
+    connectToRoom(urlRoom.toUpperCase());
+  } else {
+    render();
+  }
+} else {
+  showAlertModal('通信環境の影響でオンライン機能（ログイン・複数人での同時編集）を読み込めませんでした。インターネット接続を確認し、ページを再読み込みしてください。');
+}
 </script>
 </body>
 </html>
