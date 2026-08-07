@@ -137,6 +137,7 @@ function matchScoreText(m){
   return hasScores ? `${m.scoreA} - ${m.scoreB}` : '';
 }
 
+let viewerTab = null; // 'prelim' | 'bracket'
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
@@ -155,15 +156,33 @@ function render(){
     </div>
   `));
 
-  if(data.bracket){
+  const hasPrelim = data.matches && data.matches.length>0;
+  const hasBracket = !!data.bracket;
+
+  if(!hasPrelim && !hasBracket){
+    app.appendChild(el(`<div class="panel"><p class="empty">まだ大会が始まっていません。運営者が予選を組むとここに表示されます。</p></div>`));
+    return;
+  }
+
+  if(viewerTab===null) viewerTab = hasBracket ? 'bracket' : 'prelim';
+
+  if(hasPrelim && hasBracket){
+    const tabbar = el(`<div class="tabbar"></div>`);
+    const t1 = el(`<div class="tab ${viewerTab==='prelim'?'active':''}">予選結果</div>`);
+    const t2 = el(`<div class="tab ${viewerTab==='bracket'?'active':''}">決勝トーナメント</div>`);
+    t1.addEventListener('click', ()=>{ viewerTab='prelim'; render(); });
+    t2.addEventListener('click', ()=>{ viewerTab='bracket'; render(); });
+    tabbar.appendChild(t1); tabbar.appendChild(t2);
+    app.appendChild(tabbar);
+  }
+
+  if((viewerTab==='bracket' || !hasPrelim) && hasBracket){
     app.appendChild(renderBracketPanel());
     const champ = getFinalStandings();
     if(champ) app.appendChild(renderChampionBanner(champ));
-  } else if(data.matches && data.matches.length){
+  } else if(hasPrelim){
     app.appendChild(renderSchedulePanel());
     app.appendChild(renderStandingsPanel());
-  } else {
-    app.appendChild(el(`<div class="panel"><p class="empty">まだ大会が始まっていません。運営者が予選を組むとここに表示されます。</p></div>`));
   }
 }
 
