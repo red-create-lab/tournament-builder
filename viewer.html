@@ -350,18 +350,22 @@ function drawBracketConnectors(container){
       if(!box || !nextBox) return;
       const slots = box.querySelectorAll('.bslot');
       if(slots.length<2) return;
+      const nextSlots = nextBox.querySelectorAll('.bslot');
+      if(nextSlots.length<2) return;
       const slotARect = slots[0].getBoundingClientRect();
       const slotBRect = slots[1].getBoundingClientRect();
       const boxRect = box.getBoundingClientRect();
+      const targetSlot = (mi%2===0) ? nextSlots[0] : nextSlots[1];
+      const targetRect = targetSlot.getBoundingClientRect();
       const nextRect = nextBox.getBoundingClientRect();
 
       const startX = boxRect.right - containerRect.left;
       const aY = slotARect.top + slotARect.height/2 - containerRect.top;
       const bY = slotBRect.top + slotBRect.height/2 - containerRect.top;
-      const mergeX = startX + 16;
+      const mergeX = startX + 22;
       const mergeY = (aY+bY)/2;
       const endX = nextRect.left - containerRect.left;
-      const endY = nextRect.top + nextRect.height/2 - containerRect.top;
+      const endY = targetRect.top + targetRect.height/2 - containerRect.top;
 
       const colorA = (m.winner && m.winner===m.a) ? GREEN : GRAY;
       const colorB = (m.winner && m.winner===m.b) ? GREEN : GRAY;

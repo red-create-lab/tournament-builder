@@ -1242,7 +1242,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.3</div>
+        <div class="tag">Tournament Builder · v5.4</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2411,18 +2411,23 @@ function drawBracketConnectors(panelEl){
       if(!box || !nextBox) return;
       const slots = box.querySelectorAll('.bslot');
       if(slots.length<2) return;
+      const nextSlots = nextBox.querySelectorAll('.bslot');
+      if(nextSlots.length<2) return;
       const slotARect = slots[0].getBoundingClientRect();
       const slotBRect = slots[1].getBoundingClientRect();
       const boxRect = box.getBoundingClientRect();
+      // 次のラウンドの対戦カードの「正しい枠」（上段=A側／下段=B側）を狙う
+      const targetSlot = (mi%2===0) ? nextSlots[0] : nextSlots[1];
+      const targetRect = targetSlot.getBoundingClientRect();
       const nextRect = nextBox.getBoundingClientRect();
 
       const startX = boxRect.right - containerRect.left;
       const aY = slotARect.top + slotARect.height/2 - containerRect.top;
       const bY = slotBRect.top + slotBRect.height/2 - containerRect.top;
-      const mergeX = startX + 16; // 各チームの枠から出た線が合流するX位置
+      const mergeX = startX + 22; // 各チームの枠から出た線が合流するX位置
       const mergeY = (aY+bY)/2;
       const endX = nextRect.left - containerRect.left;
-      const endY = nextRect.top + nextRect.height/2 - containerRect.top;
+      const endY = targetRect.top + targetRect.height/2 - containerRect.top;
 
       const colorA = (m.winner && m.winner===m.a) ? GREEN : GRAY;
       const colorB = (m.winner && m.winner===m.b) ? GREEN : GRAY;
