@@ -40,8 +40,9 @@
   .match-row:last-child{border-bottom:none;}
   .match-team{flex:1;font-weight:600;}
   .match-team.left{text-align:right;}
-  .match-team.win{color:var(--win);}
-  .match-team.lose{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;}
+  .match-team.win{color:var(--win);font-weight:800;}
+  .match-team.win::before{content:"✓ ";}
+  .match-team.lose{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:0.75;}
   .score{min-width:50px;text-align:center;font-weight:800;background:var(--court);border-radius:6px;padding:2px 6px;font-variant-numeric:tabular-nums;}
   .next-tag{background:var(--amber);color:var(--navy);border-radius:20px;padding:3px 9px;font-size:10.5px;font-weight:800;}
   .bracket-wrap{overflow-x:auto;}
@@ -50,8 +51,9 @@
   .round-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);text-align:center;margin-bottom:8px;font-weight:700;}
   .bmatch{background:var(--paper);border:1.5px solid #DDE3ED;border-radius:10px;margin:8px 0;padding:8px 10px;position:relative;z-index:1;}
   .bslot{padding:4px 2px;font-size:12.5px;font-weight:600;}
-  .bslot.win{color:var(--win);}
-  .bslot.lose{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;}
+  .bslot.win{color:var(--win);font-weight:800;}
+  .bslot.win::before{content:"✓ ";}
+  .bslot.lose{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:0.7;}
   .champion-banner{margin-top:16px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;border-radius:14px;padding:24px;text-align:center;}
   .champion-banner .tag{font-size:11px;letter-spacing:.2em;color:var(--amber);text-transform:uppercase;font-weight:700;}
   .champion-banner .name{font-size:26px;font-weight:800;margin-top:6px;}

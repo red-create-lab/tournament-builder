@@ -124,8 +124,9 @@
   .match-team{flex:1;font-weight:600;text-align:right;}
   .match-team.left{text-align:left;}
   .vs{color:var(--sub);font-size:11px;font-weight:700;padding:0 4px;}
-  .match-decided .winner{color:var(--win);}
-  .match-decided .loser{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;}
+  .match-decided .winner{color:var(--win);font-weight:800;}
+  .match-decided .winner::before{content:"✓ ";}
+  .match-decided .loser{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:0.75;}
   .match-drawn{background:#FBF3E4;border-radius:8px;}
 
   /* standings table */
@@ -156,8 +157,9 @@
     background:var(--paper);border:1.5px solid #DDE3ED;border-radius:10px;margin:10px 0;padding:10px 12px;position:relative;
   }
   .bslot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 2px;font-size:13.5px;font-weight:600;}
-  .bslot.winner{color:var(--win);}
-  .bslot.loser{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;}
+  .bslot.winner{color:var(--win);font-weight:800;}
+  .bslot.winner .bname::before{content:"✓ ";}
+  .bslot.loser{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:0.7;}
   .bslot .bname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
   .bslot select{font-size:12px;padding:3px 4px;max-width:110px;}
   .bdivider{height:1px;background:#E5EAF2;margin:2px 0;}
@@ -467,6 +469,26 @@ function leaveRoom(){
   if(unsubscribeRoom){ unsubscribeRoom(); unsubscribeRoom = null; }
   state.roomId = null;
   state.roomStage = 'room-select';
+  state.viewToken = null;
+  // ローカルの大会データもリセット（次に作る/入る大会に前のデータが混ざらないように）
+  state.tournamentName = '';
+  state.teams = [];
+  state.numGroups = 1;
+  state.groups = [];
+  state.matches = [];
+  state.manualOrder = {};
+  state.advanceChecked = {};
+  state.advanceOrder = [];
+  state.bracket = null;
+  state.schedule = [];
+  state.scheduleWarnings = [];
+  state.savedThisTournament = false;
+  state.holdThirdPlace = false;
+  state.withdrawnTeams = {};
+  nextTeamId = 1;
+  nextMatchId = 1;
+  state.stage = 'setup';
+  state.previousStage = 'setup';
   const url = new URL(location.href);
   url.searchParams.delete('room');
   history.replaceState(null, '', url.toString());
@@ -1220,7 +1242,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.1</div>
+        <div class="tag">Tournament Builder · v5.2</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2388,8 +2410,8 @@ function drawBracketConnectors(panelEl){
       const path = document.createElementNS(svgNS,'path');
       path.setAttribute('d', `M ${startX} ${startY} H ${midX} V ${endY} H ${endX}`);
       path.setAttribute('fill','none');
-      path.setAttribute('stroke', advanced ? '#2E7D5B' : '#CBD3E1');
-      path.setAttribute('stroke-width', advanced ? '3.5' : '1.5');
+      path.setAttribute('stroke', advanced ? '#1F9260' : '#DCE2EA');
+      path.setAttribute('stroke-width', advanced ? '4' : '1.5');
       path.setAttribute('stroke-linecap','round');
       svg.appendChild(path);
     });
