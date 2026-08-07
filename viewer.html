@@ -79,6 +79,20 @@ function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(
 function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 let data = null;
+function deserializeData(raw){
+  const out = Object.assign({}, raw);
+  out.groups = (raw.groups||[]).map(g=> (g && g.teamIds) ? g.teamIds : (Array.isArray(g)?g:[]) );
+  if(raw.bracket){
+    out.bracket = {
+      size: raw.bracket.size,
+      rounds: (raw.bracket.rounds||[]).map(r=> (r && r.matches) ? r.matches : (Array.isArray(r)?r:[]) ),
+      thirdPlaceMatch: raw.bracket.thirdPlaceMatch || null,
+    };
+  } else {
+    out.bracket = null;
+  }
+  return out;
+}
 let activeGroupTab = 0;
 
 function teamName(data, id){
@@ -246,8 +260,8 @@ function renderBracketPanel(){
     const col = el(`<div class="round-col"><div class="round-title">${roundNames[ri]}</div></div>`);
     round.forEach(m=>{
       const w = m.winner;
-      const aName = m.a===null?'（未定）':(m.a==='BYE'?'― 不戦勝 ―':teamName(data,m.a));
-      const bName = m.b===null?'（未定）':(m.b==='BYE'?'― 不戦勝 ―':teamName(data,m.b));
+      const aName = m.a===null?'（未定）':(m.a==='BYE'?'― シード ―':teamName(data,m.a));
+      const bName = m.b===null?'（未定）':(m.b==='BYE'?'― シード ―':teamName(data,m.b));
       const aCls = w ? (m.a===w?'win':'lose') : '';
       const bCls = w ? (m.b===w?'win':'lose') : '';
       const box2 = el(`
@@ -338,7 +352,8 @@ if(!viewToken){
     const db = firebase.firestore();
     db.collection('public_view').doc(viewToken).onSnapshot(
       doc=>{
-        data = doc.exists ? doc.data() : null;
+        const raw = doc.exists ? doc.data() : null;
+        data = raw ? deserializeData(raw) : null;
         render();
       },
       err=>{

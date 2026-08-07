@@ -351,6 +351,17 @@ function snapshotSyncedState(){
   SYNCED_FIELDS.forEach(k=> obj[k] = state[k]);
   obj.nextTeamId = nextTeamId;
   obj.nextMatchId = nextMatchId;
+  // Firestoreは「配列の中に配列」を保存できないため、保存用に変換する
+  obj.groups = (state.groups||[]).map(g=>({teamIds: g}));
+  if(state.bracket){
+    obj.bracket = {
+      size: state.bracket.size,
+      rounds: (state.bracket.rounds||[]).map(round=>({matches: round})),
+      thirdPlaceMatch: state.bracket.thirdPlaceMatch || null,
+    };
+  } else {
+    obj.bracket = null;
+  }
   obj.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
   obj.updatedBy = state.currentUser ? (state.currentUser.name || state.currentUser.email) : '不明';
   return obj;
@@ -360,7 +371,14 @@ function scheduleFirestoreSave(){
   if(suppressNextWrite){ suppressNextWrite = false; return; }
   if(firestoreSaveTimer) clearTimeout(firestoreSaveTimer);
   firestoreSaveTimer = setTimeout(()=>{
-    const payload = snapshotSyncedState();
+    let payload;
+    try{
+      payload = snapshotSyncedState();
+    }catch(e){
+      console.error('payload build failed', e);
+      showToast('⚠ 同期データの作成に失敗しました');
+      return;
+    }
     fbDb.collection('tournaments').doc(state.roomId).set(payload, {merge:true})
       .then(()=>{
         const indicator = document.getElementById('autosaveIndicator');
@@ -369,7 +387,10 @@ function scheduleFirestoreSave(){
           indicator.textContent = `☁️ 同期済み ${t}`;
         }
         if(state.viewToken){
-          fbDb.collection('public_view').doc(state.viewToken).set(payload, {merge:true}).catch(err=>console.error('mirror save failed', err));
+          fbDb.collection('public_view').doc(state.viewToken).set(payload, {merge:true}).catch(err=>{
+            console.error('mirror save failed', err);
+            showToast('⚠ 参加者用画面への反映に失敗しました');
+          });
         }
       })
       .catch(err=>{
@@ -382,7 +403,22 @@ function applyRemoteSnapshot(data){
   suppressNextWrite = true;
   SYNCED_FIELDS.forEach(k=>{
     if(k==='nextTeamId'||k==='nextMatchId') return;
-    if(data[k]!==undefined) state[k] = data[k];
+    if(data[k]===undefined) return;
+    if(k==='groups'){
+      state.groups = (data.groups||[]).map(g=> (g && g.teamIds) ? g.teamIds : (Array.isArray(g)?g:[]) );
+    } else if(k==='bracket'){
+      if(data.bracket){
+        state.bracket = {
+          size: data.bracket.size,
+          rounds: (data.bracket.rounds||[]).map(r=> (r && r.matches) ? r.matches : (Array.isArray(r)?r:[]) ),
+          thirdPlaceMatch: data.bracket.thirdPlaceMatch || null,
+        };
+      } else {
+        state.bracket = null;
+      }
+    } else {
+      state[k] = data[k];
+    }
   });
   if(data.nextTeamId!==undefined) nextTeamId = data.nextTeamId;
   if(data.nextMatchId!==undefined) nextMatchId = data.nextMatchId;
@@ -726,8 +762,8 @@ function exportToExcel(){
     rounds.forEach((round, ri)=>{
       const label = roundLabelFor(rounds.length, ri);
       round.forEach((m, mi)=>{
-        const aName = m.a===null ? '（未定）' : (m.a==='BYE' ? '不戦勝' : teamName(m.a));
-        const bName = m.b===null ? '（未定）' : (m.b==='BYE' ? '不戦勝' : teamName(m.b));
+        const aName = m.a===null ? '（未定）' : (m.a==='BYE' ? 'シード' : teamName(m.a));
+        const bName = m.b===null ? '（未定）' : (m.b==='BYE' ? 'シード' : teamName(m.b));
         let winnerName = m.winner ? (m.winner==='BYE' ? '' : teamName(m.winner)) : '';
         if(m.forfeitWinner) winnerName += '（不戦勝）';
         rows.push([label, `${ri+1}-${mi+1}`, aName, scoreText(m.scoreA), scoreText(m.scoreB), bName, winnerName]);
@@ -1184,7 +1220,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.0</div>
+        <div class="tag">Tournament Builder · v5.1</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2023,8 +2059,8 @@ function buildBracketImageDOM(w, h, title){
     tbody.appendChild(tr);
   }
   function addMatchRow(m){
-    const aName = m.a==='BYE' ? '（不戦勝）' : (m.a ? teamName(m.a) : '（未定）');
-    const bName = m.b==='BYE' ? '（不戦勝）' : (m.b ? teamName(m.b) : '（未定）');
+    const aName = m.a==='BYE' ? '（シード）' : (m.a ? teamName(m.a) : '（未定）');
+    const bName = m.b==='BYE' ? '（シード）' : (m.b ? teamName(m.b) : '（未定）');
     const w2 = m.winner;
     const aWin = w2 && m.a===w2, bWin = w2 && m.b===w2;
     const tr = document.createElement('tr');
@@ -2367,7 +2403,7 @@ function renderSlot(m, side, ri, mi, scoreInputEl){
   const w = m.winner;
   let cls='bslot';
   if(w){ cls += (val===w) ? ' winner' : ' loser'; }
-  const displayName = val===null ? '（未定）' : (val==='BYE' ? '― 不戦勝 ―' : teamName(val));
+  const displayName = val===null ? '（未定）' : (val==='BYE' ? '― シード ―' : teamName(val));
   const slot = el(`<div class="${cls}"><span class="bname">${escapeHtml(displayName)}</span></div>`);
   if(ri===0 && bracketEditMode && val!==null){
     const select = document.createElement('select');
@@ -2380,7 +2416,7 @@ function renderSlot(m, side, ri, mi, scoreInputEl){
     allSlots.forEach(s=>{
       const opt = document.createElement('option');
       opt.value = `${s.matchIdx}:${s.side}`;
-      opt.textContent = s.val==='BYE' ? '― 不戦勝 ―' : teamName(s.val);
+      opt.textContent = s.val==='BYE' ? '― シード ―' : teamName(s.val);
       if(s.matchIdx===mi && s.side===side) opt.selected = true;
       select.appendChild(opt);
     });
