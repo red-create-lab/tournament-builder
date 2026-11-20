@@ -62,6 +62,45 @@
   .champion-banner .sub{font-size:12.5px;color:#C7D5E8;margin-top:10px;}
   .empty{text-align:center;color:var(--sub);padding:40px 10px;font-size:14px;}
   .bracket-lines{position:absolute;left:0;top:0;pointer-events:none;z-index:0;}
+  /* ---- v6.0: タイムスケジュール・自分のチーム ---- */
+  .pick{display:flex;align-items:center;gap:10px;}
+  .pick label{font-size:12.5px;font-weight:800;white-space:nowrap;}
+  .pick select{flex:1;min-width:0;font-family:inherit;font-size:15px;font-weight:700;padding:9px 10px;border:1.5px solid var(--amber);border-radius:8px;background:#fff;color:var(--navy);}
+  .mine{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+  .mi{display:flex;align-items:center;gap:8px;background:#FDF6E8;border-radius:8px;padding:8px 10px;font-size:13px;flex-wrap:wrap;}
+  .mi .t{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;min-width:46px;}
+  .mi .c{font-size:11px;font-weight:800;background:var(--navy);color:#fff;border-radius:6px;padding:2px 7px;white-space:nowrap;}
+  .mi .lb{font-size:10.5px;font-weight:800;color:var(--sub);white-space:nowrap;}
+  .mi .vs{flex:1;font-weight:700;min-width:6em;}
+  .mi .res{font-size:12px;font-weight:800;white-space:nowrap;}
+  .mi.done{background:#F1F3F7;color:var(--sub);}
+  .mine-empty{font-size:12.5px;color:var(--sub);margin-top:10px;}
+  .vt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.vt{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed;}
+  table.vt th{font-size:10.5px;color:var(--sub);text-align:left;padding:6px 4px;border-bottom:2px solid #E5EAF2;}
+  table.vt th.tm{width:52px;}
+  table.vt td{padding:4px 3px;border-bottom:1px solid #EDF0F5;vertical-align:top;}
+  table.vt td.tm{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;padding-top:9px;}
+  table.vt td.tm .n{display:block;font-size:9.5px;color:var(--sub);font-weight:700;}
+  .vc{border-radius:7px;padding:5px 6px;}
+  .vc.hl{background:#FDF0D8;box-shadow:inset 0 0 0 2px var(--amber);}
+  .vc .rl{font-size:10px;font-weight:800;color:var(--sub);margin-bottom:1px;}
+  .ln{display:flex;justify-content:space-between;gap:4px;font-weight:600;line-height:1.55;}
+  .ln span:first-child{overflow-wrap:anywhere;}
+  .ln .s{font-weight:800;font-variant-numeric:tabular-nums;flex:none;}
+  .ln.w{color:var(--win);font-weight:800;}
+  .ln.l{color:var(--sub);text-decoration:line-through;text-decoration-color:#C4CCDA;opacity:.75;}
+  .ln.tbd{color:#9AA6B8;font-size:11.5px;}
+  .ln.me{font-weight:800;}
+  .emp{color:#B5BFCE;font-size:11px;padding:8px 6px;}
+  tr.brk td{background:#FBF3E4;color:#8A5A10;font-weight:800;font-size:12px;padding:8px;}
+  tr.endrow td{background:#EEF1F6;color:var(--navy2);font-weight:800;font-size:12px;padding:8px;}
+  tr.gaprow td{color:#9AA6B8;font-size:11.5px;font-weight:700;padding:8px 6px;}
+  .match-row.hl{background:#FDF0D8;border-radius:8px;box-shadow:inset 0 0 0 2px var(--amber);}
+  .bmatch.hl{border-color:var(--amber);box-shadow:0 0 0 2px var(--amber);}
+  .bwhen{display:flex;align-items:center;gap:6px;margin:-2px 0 4px;}
+  .bwhen .when-t{font-size:11.5px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .bwhen .when-c{font-size:10px;font-weight:800;background:var(--navy);color:#fff;border-radius:5px;padding:1px 6px;}
 </style>
 </head>
 <body>
@@ -95,9 +134,199 @@ function deserializeData(raw){
   } else {
     out.bracket = null;
   }
+  // v6.0: コート別の並び（Firestore保存用に包んでいるのを戻す）
+  const unwrap = (raw, key)=> Array.isArray(raw) ? raw.map(r=> (r && Array.isArray(r[key])) ? r[key] : (Array.isArray(r)?r:[])) : null;
+  out.courtSchedule = unwrap(raw.courtSchedule, 'matchIds');
+  out.bracketSchedule = unwrap(raw.bracketSchedule, 'keys');
   return out;
 }
 let activeGroupTab = 0;
+
+/* ============ v6.0: コート・タイムスケジュール ============ */
+function courtName(c){ return `${String.fromCharCode(65+c)}コート`; }
+function maxSlots(lists){ return (lists||[]).reduce((n,l)=>Math.max(n,(l||[]).length),0); }
+function parseHM(s){ const m=/^(\d{1,2}):(\d{2})/.exec(s||''); if(!m) return null; const h=+m[1], mi=+m[2]; if(h>23||mi>59) return null; return h*60+mi; }
+function fmtHM(min){ min=((Math.round(min)%1440)+1440)%1440; return `${Math.floor(min/60)}:${String(min%60).padStart(2,'0')}`; }
+function computeSlotTimes(cfg, nSlots){
+  if(!cfg || !cfg.enabled) return null;
+  const start = parseHM(cfg.start); if(start===null) return null;
+  const dur = Math.max(1, Number(cfg.duration)||15);
+  const byAfter = {};
+  (cfg.breaks||[]).forEach(b=>{ const a=Number(b.after); if(a>=1 && a<nSlots) (byAfter[a]=byAfter[a]||[]).push(b); });
+  const times=[], breaksAfter={}; let t=start;
+  for(let i=1;i<=nSlots;i++){
+    times.push(t); t+=dur;
+    if(byAfter[i]) breaksAfter[i] = byAfter[i].map(b=>{ const mn=Math.max(0,Number(b.minutes)||0); const s=t; t+=mn; return {label:(b.label||'').trim()||'休憩', start:s, end:t}; });
+  }
+  return {times, breaksAfter, end:t};
+}
+function slotText(tm, i){ return tm ? fmtHM(tm.times[i]) : `第${i+1}試合`; }
+function hasScores(m){ return m.scoreA!==null && m.scoreA!=='' && m.scoreA!==undefined && m.scoreB!==null && m.scoreB!=='' && m.scoreB!==undefined; }
+// 予選のコート別の並びが使えるか（不完全なデータなら従来の1列表示に戻す）
+function prelimLists(){
+  const courts = Number(data.prelimCourts)||1;
+  const useTable = courts>1 || !!(data.prelimTime && data.prelimTime.enabled);
+  if(!useTable) return null;
+  const lists = data.courtSchedule;
+  if(!Array.isArray(lists) || lists.length!==courts) return null;
+  const ids = lists.flat().filter(x=>x!==null && x!==undefined);
+  if(ids.length!==(data.matches||[]).length) return null;
+  return lists;
+}
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+function roundLabelFor(total, ri){ const r=total-ri; if(r===1) return '決勝'; if(r===2) return '準決勝'; if(r===3) return '準々決勝'; return `${ri+1}回戦`; }
+function bracketMatchLabel(key){
+  if(key==='tp') return '3位決定戦';
+  const [ri,mi] = key.split('-').map(Number);
+  const rounds = data.bracket.rounds;
+  const base = roundLabelFor(rounds.length, ri);
+  return rounds[ri].length>1 ? base + (CIRCLED[mi]||`-${mi+1}`) : base;
+}
+function bracketMatchByKey(key){
+  if(key==='tp') return data.bracket.thirdPlaceMatch;
+  const [ri,mi] = String(key).split('-').map(Number);
+  return (data.bracket.rounds[ri]||[])[mi] || null;
+}
+function bracketLists(){
+  if(!data.bracket) return null;
+  const courts = Number(data.bracketCourts)||1;
+  const use = courts>1 || !!(data.bracketTime && data.bracketTime.enabled);
+  if(!use || !Array.isArray(data.bracketSchedule) || data.bracketSchedule.length!==courts) return null;
+  return data.bracketSchedule;
+}
+function positionsOf(lists){ const pos={}; (lists||[]).forEach((l,c)=> l.forEach((k,i)=>{ if(k!==null && k!==undefined) pos[k]={c,i}; })); return pos; }
+function feederText(key, side){
+  if(key==='tp'){ const sr=data.bracket.rounds.length-2; return `${bracketMatchLabel(`${sr}-${side==='a'?0:1}`)}の敗者`; }
+  const [ri,mi] = key.split('-').map(Number);
+  if(ri===0) return '（未定）';
+  return `${bracketMatchLabel(`${ri-1}-${2*mi+(side==='a'?0:1)}`)}の勝者`;
+}
+
+// 自分のチーム（この端末だけに覚えておく）
+let myTeam = null;
+try{ const v = localStorage.getItem('tb-viewer-team-'+(new URLSearchParams(location.search).get('v')||'')); if(v) myTeam = Number(v); }catch(e){}
+function setMyTeam(id){
+  myTeam = id;
+  try{ const k='tb-viewer-team-'+(new URLSearchParams(location.search).get('v')||''); if(id) localStorage.setItem(k,String(id)); else localStorage.removeItem(k); }catch(e){}
+  render();
+}
+function isMine(m){ return !!myTeam && m && (m.a===myTeam || m.b===myTeam); }
+
+function renderMyTeamPanel(){
+  const teams = data.teams||[];
+  if(!teams.length) return null;
+  if(myTeam && !teams.some(t=>t.id===myTeam)) myTeam = null;
+  const box = el(`<div class="panel" style="padding:16px;"></div>`);
+  const pick = el(`<div class="pick"><label>自分のチーム</label><select><option value="">選択してください</option>${teams.map(t=>`<option value="${t.id}" ${t.id===myTeam?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select></div>`);
+  pick.querySelector('select').addEventListener('change', e=> setMyTeam(e.target.value ? Number(e.target.value) : null));
+  box.appendChild(pick);
+  if(!myTeam) return box;
+
+  const items = [];
+  // 予選
+  const pl = prelimLists();
+  if(pl){
+    const tm = computeSlotTimes(data.prelimTime, maxSlots(pl));
+    for(let i=0;i<maxSlots(pl);i++) pl.forEach((l,c)=>{
+      const m = (data.matches||[]).find(x=>x.id===l[i]);
+      if(isMine(m)) items.push({m, t:slotText(tm,i), court: pl.length>1?courtName(c):'', label: data.groups.length>1?`予選 グループ${String.fromCharCode(65+m.groupIdx)}`:'予選'});
+    });
+  } else {
+    const schedule = data.schedule && data.schedule.length ? data.schedule : (data.matches||[]).map(m=>m.id);
+    schedule.forEach((mid,i)=>{ const m=(data.matches||[]).find(x=>x.id===mid); if(isMine(m)) items.push({m, t:`第${i+1}試合`, court:'', label:'予選'}); });
+  }
+  // 決勝
+  if(data.bracket){
+    const bl = bracketLists();
+    if(bl){
+      const tm = computeSlotTimes(data.bracketTime, maxSlots(bl));
+      for(let i=0;i<maxSlots(bl);i++) bl.forEach((l,c)=>{
+        const k = l[i]; if(k===null||k===undefined) return;
+        const m = bracketMatchByKey(k);
+        if(isMine(m)) items.push({m, key:k, t:slotText(tm,i), court: bl.length>1?courtName(c):'', label: bracketMatchLabel(k), bracket:true});
+      });
+    } else {
+      data.bracket.rounds.forEach((round,ri)=> round.forEach((m,mi)=>{
+        if(isMine(m) && m.a!=='BYE' && m.b!=='BYE') items.push({m, key:`${ri}-${mi}`, t:'', court:'', label: bracketMatchLabel(`${ri}-${mi}`), bracket:true});
+      }));
+      const m3 = data.bracket.thirdPlaceMatch;
+      if(isMine(m3)) items.push({m:m3, t:'', court:'', label:'3位決定戦', bracket:true});
+    }
+  }
+  const list = el(`<div class="mine"></div>`);
+  items.forEach(it=>{
+    const m = it.m;
+    const opp = m.a===myTeam ? m.b : m.a;
+    const oppName = (opp===null||opp===undefined) ? (it.key ? feederText(it.key, m.a===myTeam?'b':'a') : '（未定）') : (opp==='BYE' ? 'シード' : teamName(data,opp));
+    let res = '', done = false;
+    if(m.forfeitWinner){ done = true; res = m.forfeitWinner===myTeam ? '<span class="res" style="color:var(--win)">不戦勝</span>' : '<span class="res" style="color:var(--lose)">不戦敗</span>'; }
+    else if(hasScores(m)){
+      done = true;
+      const my = m.a===myTeam ? Number(m.scoreA) : Number(m.scoreB);
+      const op = m.a===myTeam ? Number(m.scoreB) : Number(m.scoreA);
+      const r = my>op ? ['勝','var(--win)'] : my<op ? ['負','var(--lose)'] : ['分','var(--amber-dark,#C9821F)'];
+      res = `<span class="res" style="color:${r[1]}">${r[0]} ${my}-${op}</span>`;
+    }
+    list.appendChild(el(`
+      <div class="mi ${done?'done':''}">
+        ${it.t?`<span class="t">${escapeHtml(it.t)}</span>`:''}
+        ${it.court?`<span class="c">${escapeHtml(it.court)}</span>`:''}
+        <span class="vs"><span class="lb">${escapeHtml(it.label)}</span><br>vs ${escapeHtml(oppName)}</span>
+        ${res}
+      </div>
+    `));
+  });
+  if(items.length) box.appendChild(list);
+  else box.appendChild(el(`<p class="mine-empty">このチームの試合はまだありません。</p>`));
+  return box;
+}
+
+// 時刻×コートの表（閲覧用・コンパクト）
+function renderVTable(lists, cfg, cellHtml, endLabel){
+  const n = maxSlots(lists);
+  const tm = computeSlotTimes(cfg, n);
+  const rows = [];
+  for(let i=0;i<n;i++){
+    const allEmpty = lists.every(l=> l[i]===null || l[i]===undefined);
+    const tmCell = `<td class="tm">${tm?fmtHM(tm.times[i]):''}<span class="n">第${i+1}試合</span></td>`;
+    if(allEmpty) rows.push(`<tr class="gaprow">${tmCell}<td colspan="${lists.length}">— 空き時間</td></tr>`);
+    else rows.push(`<tr>${tmCell}${lists.map(l=> `<td>${(l[i]===null||l[i]===undefined)?'<div class="emp">—</div>':cellHtml(l[i])}</td>`).join('')}</tr>`);
+    if(tm && tm.breaksAfter[i+1]) tm.breaksAfter[i+1].forEach(b=> rows.push(`<tr class="brk"><td colspan="${lists.length+1}">☕ ${escapeHtml(b.label)} ${fmtHM(b.start)}〜${fmtHM(b.end)}</td></tr>`));
+  }
+  if(tm && n>0) rows.push(`<tr class="endrow"><td colspan="${lists.length+1}">🏁 ${escapeHtml(endLabel)} ${fmtHM(tm.end)}</td></tr>`);
+  return el(`<div class="vt-wrap"><table class="vt" style="min-width:${lists.length>2?lists.length*140+52:0}px;"><thead><tr><th class="tm">${tm?'時刻':'順番'}</th>${lists.map((_,c)=>`<th>${courtName(c)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`);
+}
+function vcellLines(m, aText, bText, aTbd, bTbd){
+  const w = m.forfeitWinner || (hasScores(m) && Number(m.scoreA)!==Number(m.scoreB) ? (Number(m.scoreA)>Number(m.scoreB)?m.a:m.b) : (m.winner||null));
+  const ac = w ? (w===m.a?'w':'l') : '', bc = w ? (w===m.b?'w':'l') : '';
+  const sa = m.forfeitWinner ? (m.forfeitWinner===m.a?'不戦勝':'') : (hasScores(m)?m.scoreA:'');
+  const sb = m.forfeitWinner ? (m.forfeitWinner===m.b?'不戦勝':'') : (hasScores(m)?m.scoreB:'');
+  const me = t=> (myTeam && t===myTeam) ? ' me' : '';
+  return `<div class="ln ${ac}${me(m.a)}${aTbd?' tbd':''}"><span>${escapeHtml(aText)}</span><span class="s">${escapeHtml(String(sa))}</span></div>
+          <div class="ln ${bc}${me(m.b)}${bTbd?' tbd':''}"><span>${escapeHtml(bText)}</span><span class="s">${escapeHtml(String(sb))}</span></div>`;
+}
+function renderPrelimTimetable(lists){
+  const box = el(`<div class="panel" style="padding:14px 10px;"><h2 style="padding-left:4px;">🕒 タイムスケジュール</h2></div>`);
+  box.appendChild(renderVTable(lists, data.prelimTime, id=>{
+    const m = (data.matches||[]).find(x=>x.id===id);
+    if(!m) return '';
+    const g = data.groups.length>1 ? `<div class="rl">グループ${String.fromCharCode(65+m.groupIdx)}</div>` : '';
+    return `<div class="vc ${isMine(m)?'hl':''}">${g}${vcellLines(m, teamName(data,m.a), teamName(data,m.b))}</div>`;
+  }, '予選終了'));
+  return box;
+}
+function renderBracketTimetable(lists){
+  const box = el(`<div class="panel" style="padding:14px 10px;"><h2 style="padding-left:4px;">🕒 決勝トーナメントのタイムスケジュール</h2></div>`);
+  box.appendChild(renderVTable(lists, data.bracketTime, key=>{
+    const m = bracketMatchByKey(key);
+    if(!m) return '';
+    const aT = m.a===null||m.a===undefined, bT = m.b===null||m.b===undefined;
+    const aText = aT ? feederText(key,'a') : (m.a==='BYE'?'シード':teamName(data,m.a));
+    const bText = bT ? feederText(key,'b') : (m.b==='BYE'?'シード':teamName(data,m.b));
+    return `<div class="vc ${isMine(m)?'hl':''}"><div class="rl">${escapeHtml(bracketMatchLabel(key))}</div>${vcellLines(m, aText, bText, aT, bT)}</div>`;
+  }, '大会終了'));
+  return box;
+}
 
 function teamName(data, id){
   if(id===null||id===undefined||id==='BYE') return null;
@@ -180,14 +409,20 @@ function render(){
     app.appendChild(tabbar);
   }
 
+  const mine = renderMyTeamPanel();
+  if(mine) app.appendChild(mine);
+
   if((viewerTab==='bracket' || !hasPrelim) && hasBracket){
     const bracketPanel = renderBracketPanel();
     app.appendChild(bracketPanel);
     drawBracketConnectors(bracketPanel.querySelector('.bracket'));
     const champ = getFinalStandings();
     if(champ) app.appendChild(renderChampionBanner(champ));
+    const bl = bracketLists();
+    if(bl) app.appendChild(renderBracketTimetable(bl));
   } else if(hasPrelim){
-    app.appendChild(renderSchedulePanel());
+    const pl = prelimLists();
+    app.appendChild(pl ? renderPrelimTimetable(pl) : renderSchedulePanel());
     app.appendChild(renderStandingsPanel());
   }
 }
@@ -210,7 +445,7 @@ function renderSchedulePanel(){
     if(decided){ if(Number(m.scoreA)>Number(m.scoreB)){aCls='win';bCls='lose';} else {bCls='win';aCls='lose';} }
     const groupLabel = data.groups.length>1 ? `グループ${String.fromCharCode(65+m.groupIdx)}` : '';
     const row = el(`
-      <div class="match-row">
+      <div class="match-row ${isMine(m)?'hl':''}">
         <span class="rank-badge">${i+1}</span>
         ${groupLabel?`<span class="tab" style="cursor:default;">${groupLabel}</span>`:''}
         <span class="match-team left ${aCls}">${escapeHtml(teamName(data,m.a))}</span>
@@ -285,15 +520,21 @@ function renderBracketPanel(){
     if(val===null || val===undefined || val==='') return '';
     return `<span class="bscore">${escapeHtml(String(val))}</span>`;
   }
-  function buildMatchBox(m){
+  const bl = bracketLists();
+  const bpos = positionsOf(bl);
+  const btm = bl ? computeSlotTimes(data.bracketTime, maxSlots(bl)) : null;
+  function buildMatchBox(m, key){
     const w = m.winner;
+    const p = bpos[key];
+    const whenHtml = p ? `<div class="bwhen"><span class="when-t">${escapeHtml(slotText(btm,p.i))}</span>${bl.length>1?`<span class="when-c">${courtName(p.c)}</span>`:''}</div>` : '';
     const aName = m.a===null?'（未定）':(m.a==='BYE'?'― シード ―':teamName(data,m.a));
     const bName = m.b===null?'（未定）':(m.b==='BYE'?'― シード ―':teamName(data,m.b));
     const aCls = w ? (m.a===w?'win':'lose') : '';
     const bCls = w ? (m.b===w?'win':'lose') : '';
     const showScores = !m.forfeitWinner && m.a && m.b && m.a!=='BYE' && m.b!=='BYE';
     const matchBox = el(`
-      <div class="bmatch">
+      <div class="bmatch ${isMine(m)?'hl':''}">
+        ${whenHtml}
         <div class="bslot ${aCls}"><span class="bname">${escapeHtml(aName)}</span>${showScores?scoreBadge(m.scoreA):''}</div>
         <div style="height:1px;background:#E5EAF2;margin:2px 0;"></div>
         <div class="bslot ${bCls}"><span class="bname">${escapeHtml(bName)}</span>${showScores?scoreBadge(m.scoreB):''}</div>
@@ -306,12 +547,12 @@ function renderBracketPanel(){
   }
   rounds.forEach((round, ri)=>{
     const col = el(`<div class="round-col"><div class="round-title">${roundNames[ri]}</div></div>`);
-    round.forEach(m=>{ col.appendChild(buildMatchBox(m)); });
+    round.forEach((m,mi)=>{ col.appendChild(buildMatchBox(m, `${ri}-${mi}`)); });
     bracketEl.appendChild(col);
   });
   if(data.bracket.thirdPlaceMatch && (data.bracket.thirdPlaceMatch.a || data.bracket.thirdPlaceMatch.b)){
     const col = el(`<div class="round-col"><div class="round-title">3位決定戦</div></div>`);
-    col.appendChild(buildMatchBox(data.bracket.thirdPlaceMatch));
+    col.appendChild(buildMatchBox(data.bracket.thirdPlaceMatch, 'tp'));
     bracketEl.appendChild(col);
   }
   wrap.appendChild(bracketEl);

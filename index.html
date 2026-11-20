@@ -186,6 +186,67 @@
     input[type=text],input[type=number],select,button{min-height:38px;}
     input[type=number]{min-height:40px;}
   }
+  /* ---- v6.0: コート・タイムスケジュール ---- */
+  .sched-settings{background:var(--paper);border:1px solid #E5EAF2;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;}
+  .sched-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;}
+  .sched-row label{font-size:12.5px;font-weight:800;}
+  .sched-row select{font-size:13px;padding:6px 8px;}
+  .sched-row input[type=time]{font-family:inherit;border:1.5px solid #D3DAE6;border-radius:8px;padding:6px 8px;font-size:13px;font-weight:700;color:var(--ink);background:#fff;}
+  .sched-row input[type=number]{width:58px;padding:6px 4px;font-size:13px;}
+  .sched-unit{font-size:12px;color:var(--sub);font-weight:700;}
+  .sched-sep{width:1px;height:24px;background:#DDE3ED;}
+  .sched-toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+  .sched-toggle input{position:absolute;opacity:0;width:0;height:0;}
+  .sched-toggle .sw{width:38px;height:22px;border-radius:11px;background:#C4CCDA;position:relative;transition:background .15s;flex:none;}
+  .sched-toggle .sw::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s;}
+  .sched-toggle input:checked + .sw{background:var(--win);}
+  .sched-toggle input:checked + .sw::after{left:19px;}
+  .sched-toggle input:focus-visible + .sw{outline:2px solid var(--amber);outline-offset:2px;}
+  .break-chip{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:12px;font-weight:700;background:#FBF3E4;border:1px solid #F0D9AE;color:#8A5A10;padding:4px 6px 4px 10px;border-radius:20px;}
+  .break-chip input[type=number]{width:52px;padding:3px 2px;font-size:12px;min-height:0;}
+  .break-chip input[type=text]{width:86px;padding:3px 6px;font-size:12px;min-height:0;}
+  .break-del{background:transparent;color:var(--lose);font-size:12px;padding:2px 6px;}
+  .tt-legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:11.5px;color:var(--sub);margin:2px 0 10px;}
+  .tt-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .tt-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .cf-banner{background:#FDECEC;border:1px solid #F3C4C4;color:#B42318;font-size:12.5px;font-weight:700;border-radius:10px;padding:10px 14px;margin-bottom:10px;}
+  .tt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--paper);border:1px solid #E5EAF2;border-radius:12px;padding:4px 10px;}
+  table.tt{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;}
+  table.tt.tt-single{min-width:520px;}
+  table.tt th{font-size:12px;color:var(--navy-2);text-align:left;padding:10px 8px;border-bottom:2px solid #E5EAF2;font-weight:800;}
+  table.tt td{padding:6px 4px;border-bottom:1px solid #EDF0F5;vertical-align:middle;}
+  table.tt tr:last-child td{border-bottom:none;}
+  table.tt .tt-time{width:84px;padding-left:8px;}
+  table.tt td.tt-time .t{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--navy);line-height:1.2;}
+  table.tt td.tt-time .n{font-size:10.5px;color:var(--sub);font-weight:700;}
+  .tt-cell{border-radius:8px;}
+  .tt-cell .match-row{border-bottom:none;padding:6px 6px;gap:6px;font-size:13px;}
+  .tt-cell .match-row input[type=number]{width:46px;padding:6px 2px;}
+  .tt-cell .match-team{white-space:normal;min-width:3.5em;line-height:1.3;overflow-wrap:anywhere;}
+  .tt-cell.tt-next{background:#FDF6E8;box-shadow:inset 3px 0 0 var(--amber);}
+  .tt-cell.cf-orange{background:#FDF1E0;box-shadow:inset 3px 0 0 #E08A1E;}
+  .tt-cell.cf-red{background:#FDECEC;box-shadow:inset 3px 0 0 #E5484D;}
+  .cf-msg{font-size:11px;font-weight:700;padding:0 8px 6px 12px;line-height:1.5;}
+  .cf-msg-orange{color:#A85F0C;}
+  .cf-msg-red{color:#B42318;}
+  .tt-empty{color:#B5BFCE;font-size:12px;font-weight:700;padding-left:10px;}
+  tr.tt-gap td:not(.tt-time){color:#9AA6B8;font-size:12px;font-weight:700;}
+  tr.tt-break td{background:#FBF3E4;color:#8A5A10;font-weight:800;font-size:13px;padding:9px 10px;}
+  tr.tt-end td{background:#EEF1F6;color:var(--navy-2);font-weight:800;font-size:12.5px;padding:9px 10px;}
+  .slot-ctrl{display:flex;gap:3px;flex:none;margin-left:2px;}
+  .slot-ctrl .btn-icon{width:26px;height:26px;font-size:11px;}
+  .slot-ctrl .btn-icon:disabled{opacity:.3;cursor:default;}
+  .slot-mv{font-size:11px;font-weight:800;padding:0 7px;height:26px;border-radius:7px;background:#fff;border:1.5px solid #C7D0E0;color:var(--navy);white-space:nowrap;}
+  .slot-mv:hover{background:var(--court);}
+  .slot-mv-sel{font-size:11px;padding:2px 4px;height:26px;}
+  .match-team.tbd{color:#9AA6B8;font-weight:600;font-size:12px;}
+  .rtag{white-space:nowrap;}
+  .rtag-final{background:var(--amber)!important;color:var(--navy)!important;}
+  .bwhen{display:flex;align-items:center;gap:6px;margin:-2px 0 4px;}
+  .bwhen .when-t{font-size:12px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;}
+  .bwhen .when-c{font-size:10.5px;font-weight:800;background:var(--navy);color:#fff;border-radius:5px;padding:1px 6px;}
+  body.readonly-mode .slot-ctrl, body.readonly-mode .sched-settings button, body.readonly-mode .break-del{display:none;}
+  body.readonly-mode .sched-toggle{pointer-events:none;opacity:.55;}
   .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px 0 0 0;border-radius:8px;}
   .table-scroll table{margin-top:0;}
   @media (max-width:700px){
@@ -225,7 +286,28 @@ let state = {
   roomStage: 'room-select',  // room-select | connecting | connected | error
   currentUser: null,         // {uid, name, email, photoURL} ログイン中の運営者
   viewToken: null,           // 閲覧用サイトのトークン（編集用とは別の合言葉）
+  // ---- v6.0: コート・タイムスケジュール ----
+  prelimCourts: 1,           // 予選のコート数
+  courtSchedule: [],         // 予選：コートごとの試合IDの並び [[matchId|null,...], ...]（nullは空き枠）
+  courtScheduleEdited: false,// 予選：手動で並びを変更したか
+  prelimTime: {enabled:false, start:'10:00', duration:15, breaks:[]}, // breaks: [{after, minutes, label}]
+  bracketCourts: 1,          // 決勝のコート数
+  bracketSchedule: null,     // 決勝：コートごとの試合キーの並び [["0-1"|"tp"|null,...], ...]
+  bracketScheduleEdited: false,
+  bracketTime: {enabled:false, start:'', duration:15, breaks:[]},
 };
+function defaultPrelimTime(){ return {enabled:false, start:'10:00', duration:15, breaks:[]}; }
+function defaultBracketTime(){ return {enabled:false, start:'', duration:15, breaks:[]}; }
+function resetCourtTimeState(){
+  state.prelimCourts = 1;
+  state.courtSchedule = [];
+  state.courtScheduleEdited = false;
+  state.prelimTime = defaultPrelimTime();
+  state.bracketCourts = 1;
+  state.bracketSchedule = null;
+  state.bracketScheduleEdited = false;
+  state.bracketTime = defaultBracketTime();
+}
 let nextTeamId = 1;
 let nextMatchId = 1;
 
@@ -316,8 +398,16 @@ const SYNCED_FIELDS = [
   'tournamentName','teams','numGroups','groups','matches','manualOrder',
   'advanceChecked','advanceOrder','bracket','schedule','scheduleWarnings',
   'savedThisTournament','holdThirdPlace','withdrawnTeams','nextTeamId','nextMatchId',
-  'viewToken'
+  'viewToken',
+  'prelimCourts','courtSchedule','courtScheduleEdited','prelimTime',
+  'bracketCourts','bracketSchedule','bracketScheduleEdited','bracketTime'
 ];
+// Firestoreは「配列の中に配列」を保存できないため、コート別の並びも包んで保存する
+function wrapLists(lists, key){ return Array.isArray(lists) ? lists.map(l=>({[key]: (l||[]).map(x=> x===undefined ? null : x)})) : null; }
+function unwrapLists(raw, key){
+  if(!Array.isArray(raw)) return null;
+  return raw.map(r=> (r && Array.isArray(r[key])) ? r[key] : (Array.isArray(r) ? r : []));
+}
 function genRoomId(){
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0,O,1,I)を除外
   let id = '';
@@ -364,6 +454,8 @@ function snapshotSyncedState(){
   } else {
     obj.bracket = null;
   }
+  obj.courtSchedule = wrapLists(state.courtSchedule, 'matchIds') || [];
+  obj.bracketSchedule = state.bracketSchedule ? wrapLists(state.bracketSchedule, 'keys') : null;
   obj.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
   obj.updatedBy = state.currentUser ? (state.currentUser.name || state.currentUser.email) : '不明';
   return obj;
@@ -418,10 +510,19 @@ function applyRemoteSnapshot(data){
       } else {
         state.bracket = null;
       }
+    } else if(k==='courtSchedule'){
+      state.courtSchedule = unwrapLists(data.courtSchedule, 'matchIds') || [];
+    } else if(k==='bracketSchedule'){
+      state.bracketSchedule = data.bracketSchedule ? unwrapLists(data.bracketSchedule, 'keys') : null;
     } else {
       state[k] = data[k];
     }
   });
+  // v6.0より前に作った大会のデータには設定がないので既定値を補う
+  if(!state.prelimTime) state.prelimTime = defaultPrelimTime();
+  if(!state.bracketTime) state.bracketTime = defaultBracketTime();
+  if(!state.prelimCourts) state.prelimCourts = 1;
+  if(!state.bracketCourts) state.bracketCourts = 1;
   if(data.nextTeamId!==undefined) nextTeamId = data.nextTeamId;
   if(data.nextMatchId!==undefined) nextMatchId = data.nextMatchId;
   render();
@@ -485,6 +586,7 @@ function leaveRoom(){
   state.savedThisTournament = false;
   state.holdThirdPlace = false;
   state.withdrawnTeams = {};
+  resetCourtTimeState();
   nextTeamId = 1;
   nextMatchId = 1;
   state.stage = 'setup';
@@ -576,7 +678,9 @@ function scheduleAutosave(){
       withdrawnTeams: state.withdrawnTeams,
       savedThisTournament: state.savedThisTournament,
       holdThirdPlace: state.holdThirdPlace,
-      stage: (state.stage==='history'||state.stage==='withdraw') ? state.previousStage : state.stage,
+      prelimCourts: state.prelimCourts, courtSchedule: state.courtSchedule, courtScheduleEdited: state.courtScheduleEdited, prelimTime: state.prelimTime,
+      bracketCourts: state.bracketCourts, bracketSchedule: state.bracketSchedule, bracketScheduleEdited: state.bracketScheduleEdited, bracketTime: state.bracketTime,
+      stage:(state.stage==='history'||state.stage==='withdraw') ? state.previousStage : state.stage,
       nextTeamId, nextMatchId,
       savedAt: new Date().toISOString(),
     };
@@ -605,6 +709,14 @@ function restoreSnapshot(snap){
   state.withdrawnTeams = snap.withdrawnTeams || {};
   state.savedThisTournament = snap.savedThisTournament || false;
   state.holdThirdPlace = snap.holdThirdPlace || false;
+  state.prelimCourts = snap.prelimCourts || 1;
+  state.courtSchedule = snap.courtSchedule || [];
+  state.courtScheduleEdited = !!snap.courtScheduleEdited;
+  state.prelimTime = snap.prelimTime || defaultPrelimTime();
+  state.bracketCourts = snap.bracketCourts || 1;
+  state.bracketSchedule = snap.bracketSchedule || null;
+  state.bracketScheduleEdited = !!snap.bracketScheduleEdited;
+  state.bracketTime = snap.bracketTime || defaultBracketTime();
   state.stage = snap.stage || 'setup';
   state.previousStage = state.stage;
   nextTeamId = snap.nextTeamId || ((Math.max(0,...(snap.teams||[]).map(t=>t.id)))+1);
@@ -667,6 +779,7 @@ function resetTournament(){
   state.withdrawnTeams = {};
   state.savedThisTournament = false;
   state.holdThirdPlace = false;
+  resetCourtTimeState();
   clearAutosave();
   render();
 }
@@ -745,8 +858,17 @@ function exportToExcel(){
 
   // シート2: 予選_対戦スケジュール／結果
   if(state.matches.length){
-    const rows = [['No','グループ','チームA','スコアA','スコアB','チームB','勝者']];
-    const order = (state.schedule && state.schedule.length) ? state.schedule : state.matches.map(m=>m.id);
+    const useTable = prelimUsesTable();
+    const rows = [useTable ? ['No','時刻','コート','グループ','チームA','スコアA','スコアB','チームB','勝者'] : ['No','グループ','チームA','スコアA','スコアB','チームB','勝者']];
+    let order, slotInfo = {};
+    if(useTable){
+      const lists = getCourtLists();
+      const tm = computeSlotTimes(state.prelimTime, maxSlots(lists));
+      order = [];
+      for(let i=0;i<maxSlots(lists);i++) lists.forEach((l,c)=>{ if(l[i]!==null && l[i]!==undefined){ order.push(l[i]); slotInfo[l[i]] = [tm?fmtHM(tm.times[i]):`第${i+1}試合`, courtName(c)]; } });
+    } else {
+      order = (state.schedule && state.schedule.length) ? state.schedule : state.matches.map(m=>m.id);
+    }
     order.forEach((mid,i)=>{
       const m = matchById(mid);
       if(!m) return;
@@ -760,7 +882,8 @@ function exportToExcel(){
         else if(Number(m.scoreB)>Number(m.scoreA)) winner = teamName(m.b);
         else winner = '引き分け';
       }
-      rows.push([i+1, groupLabel, teamName(m.a), scoreText(m.scoreA), scoreText(m.scoreB), teamName(m.b), winner]);
+      const base = [groupLabel, teamName(m.a), scoreText(m.scoreA), scoreText(m.scoreB), teamName(m.b), winner];
+      rows.push(useTable ? [i+1, ...(slotInfo[mid]||['','']), ...base] : [i+1, ...base]);
     });
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '予選_対戦結果');
   }
@@ -779,18 +902,26 @@ function exportToExcel(){
 
   // シート4: 決勝トーナメント
   if(state.bracket){
-    const rows = [['ラウンド','対戦カード','チームA','スコアA','スコアB','チームB','勝者']];
+    const useSched = bracketUsesSchedule();
+    const bLists = useSched ? getBracketLists() : null;
+    const bTm = useSched ? computeSlotTimes(state.bracketTime, maxSlots(bLists)) : null;
+    const bPos = useSched ? bracketPositions(bLists) : {};
+    const rows = [useSched ? ['ラウンド','対戦カード','時刻','コート','チームA','スコアA','スコアB','チームB','勝者'] : ['ラウンド','対戦カード','チームA','スコアA','スコアB','チームB','勝者']];
     const rounds = state.bracket.rounds;
+    const pushRow = (label, card, key, m)=>{
+      const aName = m.a===null ? '（未定）' : (m.a==='BYE' ? 'シード' : teamName(m.a));
+      const bName = m.b===null ? '（未定）' : (m.b==='BYE' ? 'シード' : teamName(m.b));
+      let winnerName = m.winner ? (m.winner==='BYE' ? '' : teamName(m.winner)) : '';
+      if(m.forfeitWinner) winnerName += '（不戦勝）';
+      const p = bPos[key];
+      const when = p ? [bTm ? fmtHM(bTm.times[p.i]) : `第${p.i+1}試合`, courtName(p.c)] : ['',''];
+      rows.push(useSched ? [label, card, ...when, aName, scoreText(m.scoreA), scoreText(m.scoreB), bName, winnerName] : [label, card, aName, scoreText(m.scoreA), scoreText(m.scoreB), bName, winnerName]);
+    };
     rounds.forEach((round, ri)=>{
       const label = roundLabelFor(rounds.length, ri);
-      round.forEach((m, mi)=>{
-        const aName = m.a===null ? '（未定）' : (m.a==='BYE' ? 'シード' : teamName(m.a));
-        const bName = m.b===null ? '（未定）' : (m.b==='BYE' ? 'シード' : teamName(m.b));
-        let winnerName = m.winner ? (m.winner==='BYE' ? '' : teamName(m.winner)) : '';
-        if(m.forfeitWinner) winnerName += '（不戦勝）';
-        rows.push([label, `${ri+1}-${mi+1}`, aName, scoreText(m.scoreA), scoreText(m.scoreB), bName, winnerName]);
-      });
+      round.forEach((m, mi)=> pushRow(label, `${ri+1}-${mi+1}`, `${ri}-${mi}`, m));
     });
+    if(state.bracket.thirdPlaceMatch) pushRow('3位決定戦', '3位', 'tp', state.bracket.thirdPlaceMatch);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), '決勝トーナメント');
   }
 
@@ -882,8 +1013,565 @@ function buildSchedule(){
   if(interleaved.conflicts>0){
     state.scheduleWarnings.push(`グループの試合数に偏りがあるため、${interleaved.conflicts}件だけ同グループの試合が連続しています。`);
   }
+  buildCourtSchedule();
 }
 
+
+/* ============================= v6.0 コート・タイムスケジュール ============================= */
+function courtName(c){ return `${String.fromCharCode(65+c)}コート`; }
+function courtLetter(c){ return String.fromCharCode(65+c); }
+function trimLists(lists){
+  lists.forEach(l=>{
+    for(let i=0;i<l.length;i++) if(l[i]===undefined) l[i]=null;
+    while(l.length && l[l.length-1]===null) l.pop();
+  });
+  return lists;
+}
+function maxSlots(lists){ return (lists||[]).reduce((n,l)=>Math.max(n,(l||[]).length),0); }
+
+/* ---- 時刻の計算 ---- */
+function parseHM(s){
+  const m = /^(\d{1,2}):(\d{2})/.exec(s||'');
+  if(!m) return null;
+  const h=Number(m[1]), mi=Number(m[2]);
+  if(h>23||mi>59) return null;
+  return h*60+mi;
+}
+function fmtHM(min){ min=((Math.round(min)%1440)+1440)%1440; return `${Math.floor(min/60)}:${String(min%60).padStart(2,'0')}`; }
+// 各「段（第○試合）」の開始時刻を計算する。休憩は「第○試合のあと」に入り、それ以降が後ろにずれる
+function computeSlotTimes(cfg, nSlots){
+  if(!cfg || !cfg.enabled) return null;
+  const start = parseHM(cfg.start);
+  if(start===null) return null;
+  const dur = Math.max(1, Number(cfg.duration)||15);
+  const byAfter = {};
+  (cfg.breaks||[]).forEach(b=>{
+    const a = Number(b.after);
+    if(a>=1 && a<nSlots) (byAfter[a]=byAfter[a]||[]).push(b);
+  });
+  const times = [], breaksAfter = {};
+  let t = start;
+  for(let i=1;i<=nSlots;i++){
+    times.push(t);
+    t += dur;
+    if(byAfter[i]){
+      breaksAfter[i] = byAfter[i].map(b=>{
+        const minutes = Math.max(0, Number(b.minutes)||0);
+        const s = t; t += minutes;
+        return {label: (b.label||'').trim() || '休憩', start:s, end:t, minutes};
+      });
+    }
+  }
+  return {times, breaksAfter, end:t};
+}
+function slotLabelFn(tm){ return j=> tm ? fmtHM(tm.times[j]) : `第${j+1}試合`; }
+
+/* ---- 予選：コートへの割り当て ---- */
+function prelimUsesTable(){ return (state.prelimCourts||1)>1 || !!(state.prelimTime && state.prelimTime.enabled); }
+
+// コート数がグループ数より多いとき用：同じ時間帯に同じチームが入らないよう、空いたコートに詰めていく
+function packIntoCourts(ids, courts){
+  const remaining = ids.slice();
+  const lists = Array.from({length:courts}, ()=>[]);
+  let prev = new Set();
+  while(remaining.length){
+    const used = new Set(), picked = [];
+    const tryPick = (allowPrev)=>{
+      for(let i=0;i<remaining.length && picked.length<courts;i++){
+        const id = remaining[i];
+        if(picked.includes(id)) continue;
+        const m = matchById(id); if(!m) continue;
+        if(used.has(m.a)||used.has(m.b)) continue;
+        if(!allowPrev && (prev.has(m.a)||prev.has(m.b))) continue;
+        picked.push(id); used.add(m.a); used.add(m.b);
+      }
+    };
+    tryPick(false);
+    if(picked.length===0) tryPick(true); // どうしても連戦を避けられないときだけ許す
+    if(picked.length===0) picked.push(remaining[0]);
+    for(let c=0;c<courts;c++) lists[c].push(picked[c]!==undefined ? picked[c] : null);
+    picked.forEach(id=> remaining.splice(remaining.indexOf(id),1));
+    prev = used;
+  }
+  return trimLists(lists);
+}
+
+function buildCourtSchedule(){
+  const courts = Math.max(1, Number(state.prelimCourts)||1);
+  state.courtScheduleEdited = false;
+  if(courts===1){ state.courtSchedule = [state.schedule.slice()]; return; }
+  const G = state.groups.length;
+  // 各グループの中の並び（連戦しない順）は、作成済みのスケジュールの順番をそのまま使う
+  const perGroup = state.groups.map((_,gi)=> state.schedule.filter(id=>{ const m=matchById(id); return m && m.groupIdx===gi; }));
+  if(G>=courts){
+    // グループごとにコートを割り当てる（試合数の多いグループから、試合数の少ないコートへ）
+    const loads = Array(courts).fill(0), assign = Array.from({length:courts}, ()=>[]);
+    perGroup.map((ids,gi)=>({gi, n:ids.length}))
+      .sort((a,b)=> b.n-a.n || a.gi-b.gi)
+      .forEach(({gi,n})=>{ const c = loads.indexOf(Math.min(...loads)); assign[c].push(gi); loads[c]+=n; });
+    assign.forEach(a=> a.sort((x,y)=>x-y));
+    assign.sort((x,y)=> (x.length?x[0]:99) - (y.length?y[0]:99)); // グループAがAコートに来るように
+    state.courtSchedule = assign.map(gis=>{
+      if(gis.length===0) return [];
+      if(gis.length===1) return perGroup[gis[0]].slice();
+      const inter = interleaveGroups(gis.map(gi=> perGroup[gi].map(id=>matchById(id))));
+      return inter.order.map(x=>x.match.id);
+    });
+  } else {
+    state.courtSchedule = packIntoCourts(state.schedule, courts);
+  }
+  trimLists(state.courtSchedule);
+}
+
+// 保存されている並びが今の試合と食い違っていれば作り直す
+function getCourtLists(){
+  const courts = Math.max(1, Number(state.prelimCourts)||1);
+  const lists = state.courtSchedule;
+  if(Array.isArray(lists) && lists.length===courts){
+    const ids = lists.flat().filter(x=>x!==null && x!==undefined);
+    if(ids.length===state.matches.length && new Set(ids).size===ids.length && ids.every(id=>matchById(id))) return lists;
+  }
+  buildCourtSchedule();
+  return state.courtSchedule;
+}
+
+/* ---- 警告（同じ時間に重複＝赤／前後の時間帯で連戦＝オレンジ） ---- */
+function computePrelimConflicts(lists, slotLabel){
+  const res = {};
+  const add = (id, level, msg)=>{
+    const r = res[id] || (res[id] = {level:'orange', msgs:[]});
+    if(level==='red') r.level = 'red';
+    if(!r.msgs.includes(msg)) r.msgs.push(msg);
+  };
+  const teamsOf = id=>{ const m=matchById(id); return m ? [m.a,m.b] : []; };
+  const n = maxSlots(lists);
+  for(let i=0;i<n;i++){
+    lists.forEach((l,c)=>{
+      const id = l[i]; if(id===null || id===undefined) return;
+      const mine = teamsOf(id);
+      lists.forEach((l2,c2)=>{
+        if(c2===c) return;
+        const o = l2[i]; if(o===null || o===undefined) return;
+        teamsOf(o).forEach(t=>{ if(mine.includes(t)) add(id,'red',`${teamName(t)}：同じ時間に${courtName(c2)}でも試合があります`); });
+      });
+      [[-1,'直前'],[1,'直後']].forEach(([d,word])=>{
+        const j = i+d; if(j<0 || j>=n) return;
+        lists.forEach((l2,c2)=>{
+          const o = l2[j]; if(o===null || o===undefined) return;
+          teamsOf(o).forEach(t=>{ if(mine.includes(t)) add(id,'orange',`${teamName(t)}：${word}（${courtName(c2)} ${slotLabel(j)}）にも出場（連戦）`); });
+        });
+      });
+    });
+  }
+  return res;
+}
+
+/* ---- 手動調整 ---- */
+function swapSlot(lists, c, i, d){
+  const j = i+d; if(j<0) return;
+  const l = lists[c];
+  while(l.length<=j) l.push(null);
+  const tmp = l[i]; l[i] = l[j]; l[j] = tmp;
+  trimLists(lists);
+}
+// 移動元は空き枠にして、ほかの試合の時刻は変えない。移動先はそのコートの最後に入れる
+function moveToCourt(lists, c, i, t){
+  const id = lists[c][i];
+  lists[c][i] = null;
+  trimLists(lists);
+  lists[t].push(id);
+}
+function slotControls(lists, c, i, onChange){
+  const box = el(`<div class="slot-ctrl"></div>`);
+  const up = el(`<button class="btn-icon" title="前の時間へ" ${i===0?'disabled':''}>↑</button>`);
+  const dn = el(`<button class="btn-icon" title="後ろの時間へ">↓</button>`);
+  up.addEventListener('click', ()=>{ if(!requireEditPermission()) return; swapSlot(lists,c,i,-1); onChange(); });
+  dn.addEventListener('click', ()=>{ if(!requireEditPermission()) return; swapSlot(lists,c,i,1); onChange(); });
+  box.appendChild(up); box.appendChild(dn);
+  if(lists.length===2){
+    const t = 1-c;
+    const mv = el(`<button class="slot-mv" title="${courtName(t)}の最後へ移動">⇄ ${courtLetter(t)}へ</button>`);
+    mv.addEventListener('click', ()=>{ if(!requireEditPermission()) return; moveToCourt(lists,c,i,t); onChange(); });
+    box.appendChild(mv);
+  } else if(lists.length>2){
+    const sel = el(`<select class="slot-mv-sel"><option value="">⇄ 移動</option>${lists.map((_,t)=> t===c?'':`<option value="${t}">${courtLetter(t)}へ</option>`).join('')}</select>`);
+    sel.addEventListener('change', e=>{ const v=e.target.value; if(v==='') return; if(!requireEditPermission()){ render(); return; } moveToCourt(lists,c,i,Number(v)); onChange(); });
+    box.appendChild(sel);
+  }
+  return box;
+}
+
+/* ---- 設定欄（予選・決勝共通） ---- */
+function defaultBracketStart(){
+  if(state.prelimTime && state.prelimTime.enabled && state.matches.length){
+    const tm = computeSlotTimes(state.prelimTime, maxSlots(getCourtLists()));
+    if(tm){ const t = Math.ceil((tm.end+30)/5)*5; return fmtHM(t).padStart(5,'0'); }
+  }
+  return '13:00';
+}
+function renderScheduleSettings(kind){
+  const isP = kind==='prelim';
+  const courts = Math.max(1, Number(isP ? state.prelimCourts : state.bracketCourts)||1);
+  const cfg = isP ? state.prelimTime : state.bracketTime;
+  const edited = isP ? state.courtScheduleEdited : state.bracketScheduleEdited;
+  const rebuild = ()=>{
+    if(isP) buildSchedule(); else buildBracketSchedule();
+    render();
+    showToast(isP ? '🔀 スケジュールを組み直しました' : '🔀 時刻・コートを組み直しました');
+  };
+  const bar = el(`<div class="sched-settings"></div>`);
+  const row1 = el(`
+    <div class="sched-row">
+      <label>コート数</label>
+      <select data-k="courts">${[1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===courts?'selected':''}>${n}コート</option>`).join('')}</select>
+      <span class="sched-sep"></span>
+      <label class="sched-toggle"><input type="checkbox" data-k="enabled" ${cfg.enabled?'checked':''}><span class="sw"></span>タイムスケジュール</label>
+      ${cfg.enabled ? `
+        <span class="sched-sep"></span>
+        <label>開始</label><input type="time" data-k="start" value="${escapeHtml((cfg.start||'').padStart(5,'0'))}">
+        <label>1試合</label><input type="number" min="1" max="240" data-k="duration" value="${Number(cfg.duration)||15}">
+        <span class="sched-unit">分（入れ替え込み）</span>` : ''}
+      <span style="flex:1"></span>
+      <button class="btn-ghost btn-sm" data-k="rebuild">🔀 ${isP?'スケジュールを組み直す':'時刻を組み直す'}</button>
+    </div>
+  `);
+  bar.appendChild(row1);
+
+  row1.querySelector('[data-k="courts"]').addEventListener('change', e=>{
+    if(!requireEditPermission()){ render(); return; }
+    const n = Number(e.target.value)||1;
+    const apply = ()=>{
+      if(isP){ state.prelimCourts = n; buildCourtSchedule(); }
+      else { state.bracketCourts = n; buildBracketSchedule(); }
+      render();
+    };
+    if(edited){ render(); showConfirmModal('コート数を変えると、手動で調整した並びは自動割り当ての状態に戻ります。よろしいですか？', apply, {okLabel:'変更する'}); }
+    else apply();
+  });
+  row1.querySelector('[data-k="enabled"]').addEventListener('change', e=>{
+    if(!requireEditPermission()){ render(); return; }
+    cfg.enabled = e.target.checked;
+    if(cfg.enabled && !parseHM(cfg.start)) cfg.start = isP ? '10:00' : defaultBracketStart();
+    if(!isP && !state.bracketSchedule) buildBracketSchedule();
+    render();
+  });
+  const startEl = row1.querySelector('[data-k="start"]');
+  if(startEl) startEl.addEventListener('change', e=>{ if(!requireEditPermission()){ render(); return; } if(parseHM(e.target.value)!==null) cfg.start = e.target.value; render(); });
+  const durEl = row1.querySelector('[data-k="duration"]');
+  if(durEl) durEl.addEventListener('change', e=>{ if(!requireEditPermission()){ render(); return; } const v=Math.round(Number(e.target.value)); if(v>=1) cfg.duration = Math.min(240,v); render(); });
+  row1.querySelector('[data-k="rebuild"]').addEventListener('click', ()=>{
+    if(!requireEditPermission()) return;
+    if(edited) showConfirmModal('組み直すと、手動で調整した並びは自動割り当ての状態に戻ります。よろしいですか？', rebuild, {okLabel:'組み直す'});
+    else rebuild();
+  });
+
+  if(cfg.enabled){
+    const row2 = el(`<div class="sched-row"><label>休憩</label></div>`);
+    (cfg.breaks||[]).forEach((b,bi)=>{
+      const chip = el(`
+        <span class="break-chip">
+          第<input type="number" min="1" data-f="after" value="${Number(b.after)||1}">試合のあと
+          <input type="text" data-f="label" value="${escapeHtml(b.label||'休憩')}" maxlength="12">
+          <input type="number" min="1" max="600" data-f="minutes" value="${Number(b.minutes)||0}">分
+          <button class="break-del" title="この休憩を削除">✕</button>
+        </span>
+      `);
+      chip.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('change', e=>{
+          if(!requireEditPermission()){ render(); return; }
+          const f = inp.dataset.f;
+          if(f==='label') b.label = e.target.value.trim() || '休憩';
+          else { const v=Math.round(Number(e.target.value)); if(v>=1) b[f] = v; }
+          render();
+        });
+      });
+      chip.querySelector('.break-del').addEventListener('click', ()=>{ if(!requireEditPermission()) return; cfg.breaks.splice(bi,1); render(); });
+      row2.appendChild(chip);
+    });
+    const addBtn = el(`<button class="btn-ghost btn-sm">＋ 休憩を追加</button>`);
+    addBtn.addEventListener('click', ()=>{
+      if(!requireEditPermission()) return;
+      if(!Array.isArray(cfg.breaks)) cfg.breaks = [];
+      const n = isP ? maxSlots(getCourtLists()) : maxSlots(getBracketLists());
+      cfg.breaks.push({after: Math.max(1, Math.floor(n/2)), minutes: isP?45:15, label: isP?'昼休憩':'休憩'});
+      render();
+    });
+    row2.appendChild(addBtn);
+    if(!(cfg.breaks||[]).length) row2.appendChild(el(`<span class="sched-unit">昼休憩などを「第○試合のあと」に入れられます</span>`));
+    bar.appendChild(row2);
+  }
+  return bar;
+}
+
+/* ---- 時刻×コートの表（予選・決勝共通） ---- */
+function renderSlotTable(opts){
+  const lists = opts.lists;
+  const n = maxSlots(lists);
+  const tm = computeSlotTimes(opts.cfg, n);
+  const wrap = el(`
+    <div class="tt-wrap"><table class="tt ${lists.length===1?'tt-single':''}">
+      <thead><tr><th class="tt-time">${tm?'時刻':'順番'}</th>${lists.map((_,c)=>`<th>${courtName(c)}</th>`).join('')}</tr></thead>
+      <tbody></tbody>
+    </table></div>
+  `);
+  const tbody = wrap.querySelector('tbody');
+  for(let i=0;i<n;i++){
+    const tr = elRow(`<tr><td class="tt-time">${tm ? `<div class="t">${fmtHM(tm.times[i])}</div><div class="n">第${i+1}試合</div>` : `<div class="t">${i+1}</div><div class="n">第${i+1}試合</div>`}</td></tr>`);
+    const allEmpty = lists.every(l=> l[i]===null || l[i]===undefined);
+    if(allEmpty){
+      tr.classList.add('tt-gap');
+      const td = document.createElement('td'); td.colSpan = lists.length;
+      td.textContent = opts.gapText || '— 空き時間';
+      tr.appendChild(td);
+    } else {
+      lists.forEach((l,c)=>{
+        const td = document.createElement('td');
+        const id = l[i];
+        if(id===null || id===undefined) td.appendChild(el(`<div class="tt-empty">— 空き</div>`));
+        else td.appendChild(opts.cellFor(id,c,i));
+        tr.appendChild(td);
+      });
+    }
+    tbody.appendChild(tr);
+    if(tm && tm.breaksAfter[i+1]){
+      tm.breaksAfter[i+1].forEach(b=>{
+        tbody.appendChild(elRow(`<tr class="tt-break"><td colspan="${lists.length+1}">☕ ${escapeHtml(b.label)}　${fmtHM(b.start)}〜${fmtHM(b.end)}（${b.minutes}分）</td></tr>`));
+      });
+    }
+  }
+  if(tm && n>0){
+    tbody.appendChild(elRow(`<tr class="tt-end"><td colspan="${lists.length+1}">🏁 ${escapeHtml(opts.endLabel||'終了')}　${fmtHM(tm.end)}${opts.endNote?`　／　${escapeHtml(opts.endNote)}`:''}</td></tr>`));
+  }
+  return wrap;
+}
+function conflictBox(cf){
+  return el(`<div class="cf-msg cf-msg-${cf.level}">${cf.msgs.map(m=>`⚠ ${escapeHtml(m)}`).join('<br>')}</div>`);
+}
+
+function renderPrelimTable(){
+  const box = el(`<div></div>`);
+  const lists = getCourtLists();
+  const n = maxSlots(lists);
+  const tm = computeSlotTimes(state.prelimTime, n);
+  const conflicts = computePrelimConflicts(lists, slotLabelFn(tm));
+  const nextIds = new Set();
+  lists.forEach(l=>{
+    const id = l.find(id=>{
+      if(id===null||id===undefined) return false;
+      const m = matchById(id);
+      const hasScores = m.scoreA!==null && m.scoreA!=='' && m.scoreB!==null && m.scoreB!=='';
+      return !hasScores && !m.forfeitWinner;
+    });
+    if(id!==undefined) nextIds.add(id);
+  });
+  const reds = Object.values(conflicts).filter(c=>c.level==='red').length;
+  box.appendChild(el(`
+    <div class="tt-legend">
+      <span><i style="background:var(--amber)"></i>次の試合</span>
+      <span><i style="background:#E5484D"></i>同じ時間に重複（要修正）</span>
+      <span><i style="background:#E08A1E"></i>連戦の注意</span>
+      ${lists.length>1?'<span>※ 同じ行が同じ時間帯です。「↑↓」で順番、「⇄」でコートを移動できます</span>':'<span>※「↑↓」で順番を入れ替えられます</span>'}
+    </div>
+  `));
+  if(reds) box.appendChild(el(`<div class="cf-banner">⚠ 同じ時間に同じチームが2つのコートに入っている試合が${reds}件あります。赤い試合を移動してください。</div>`));
+  const onChange = ()=>{
+    state.courtScheduleEdited = true;
+    if(lists.length===1) state.schedule = lists[0].filter(x=>x!==null);
+    render();
+  };
+  box.appendChild(renderSlotTable({
+    lists, cfg: state.prelimTime,
+    endLabel: '予選終了',
+    endNote: state.prelimTime.enabled ? '決勝トーナメントの時刻は、組み合わせ決定後に決勝トーナメント画面で設定します' : '',
+    cellFor: (id,c,i)=>{
+      const m = matchById(id);
+      const groupLabel = state.groups.length>1 ? `グループ${String.fromCharCode(65+m.groupIdx)}` : null;
+      const cf = conflicts[id];
+      const cell = el(`<div class="tt-cell ${cf?'cf-'+cf.level:''} ${nextIds.has(id)?'tt-next':''}"></div>`);
+      const row = renderMatchRowEl(m, {groupLabel});
+      row.appendChild(slotControls(lists, c, i, onChange));
+      cell.appendChild(row);
+      if(cf) cell.appendChild(conflictBox(cf));
+      return cell;
+    },
+  }));
+  return box;
+}
+
+/* ---- 決勝：時刻・コートの割り当て ---- */
+function bracketUsesSchedule(){ return !!state.bracket && ((state.bracketCourts||1)>1 || !!(state.bracketTime && state.bracketTime.enabled)); }
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+function bracketMatchLabel(key){
+  if(key==='tp') return '3位決定戦';
+  const [ri,mi] = key.split('-').map(Number);
+  const rounds = state.bracket.rounds;
+  const base = roundLabelFor(rounds.length, ri);
+  return rounds[ri].length>1 ? base + (CIRCLED[mi] || `-${mi+1}`) : base;
+}
+function bracketMatchByKey(key){
+  if(!state.bracket) return null;
+  if(key==='tp') return state.bracket.thirdPlaceMatch;
+  const [ri,mi] = String(key).split('-').map(Number);
+  return (state.bracket.rounds[ri]||[])[mi] || null;
+}
+// 実際に試合をするカードの一覧（シードで自動的に勝ち上がるカードは除く）。勝ち上がり元の試合も持つ
+function bracketPlayedList(){
+  const rounds = state.bracket.rounds;
+  const out = [];
+  rounds.forEach((round,ri)=> round.forEach((m,mi)=>{
+    if(ri===0 && (m.a==='BYE' || m.b==='BYE')) return;
+    const feeders = ri===0 ? [] : [`${ri-1}-${2*mi}`, `${ri-1}-${2*mi+1}`];
+    out.push({key:`${ri}-${mi}`, feeders, side:{a:feeders[0], b:feeders[1]}});
+  }));
+  if(state.bracket.thirdPlaceMatch && rounds.length>=2){
+    const sr = rounds.length-2;
+    const tp = {key:'tp', feeders:[`${sr}-0`,`${sr}-1`], loser:true};
+    out.splice(out.length-1, 0, tp); // 決勝の前に3位決定戦
+  }
+  const playedKeys = new Set(out.map(x=>x.key));
+  out.forEach(x=>{ x.feeders = x.feeders.filter(f=>playedKeys.has(f)); });
+  return out;
+}
+// 1回戦から順に、空いているコートの一番早い枠へ。勝ち上がったチームが連戦しないよう前の試合から1枠以上あける
+function buildBracketSchedule(){
+  if(!state.bracket){ state.bracketSchedule = null; return; }
+  const courts = Math.max(1, Number(state.bracketCourts)||1);
+  const lists = Array.from({length:courts}, ()=>[]);
+  const slotOf = {};
+  const finalKey = `${state.bracket.rounds.length-1}-0`;
+  bracketPlayedList().forEach(item=>{
+    let earliest = 0;
+    item.feeders.forEach(f=>{ if(slotOf[f]!==undefined) earliest = Math.max(earliest, slotOf[f]+2); });
+    const isFinal = item.key===finalKey;
+    // 決勝は3位決定戦のあと、Aコートで単独で行う
+    if(isFinal && slotOf.tp!==undefined) earliest = Math.max(earliest, slotOf.tp+1);
+    for(let s=earliest; s<10000; s++){
+      const c = isFinal ? ((lists[0][s]===undefined || lists[0][s]===null) ? 0 : -1)
+                        : lists.findIndex(l=> l[s]===undefined || l[s]===null);
+      if(c>-1){
+        while(lists[c].length<s) lists[c].push(null);
+        lists[c][s] = item.key; slotOf[item.key] = s;
+        break;
+      }
+    }
+  });
+  state.bracketSchedule = trimLists(lists.map(l=>Array.from(l, x=> x===undefined ? null : x)));
+  state.bracketScheduleEdited = false;
+}
+function getBracketLists(){
+  if(!state.bracket) return [];
+  const courts = Math.max(1, Number(state.bracketCourts)||1);
+  const lists = state.bracketSchedule;
+  const want = bracketPlayedList().map(x=>x.key);
+  if(Array.isArray(lists) && lists.length===courts){
+    const keys = lists.flat().filter(x=>x!==null && x!==undefined);
+    if(keys.length===want.length && new Set(keys).size===keys.length && want.every(k=>keys.includes(k))) return lists;
+  }
+  buildBracketSchedule();
+  return state.bracketSchedule;
+}
+function bracketPositions(lists){
+  const pos = {};
+  lists.forEach((l,c)=> l.forEach((k,i)=>{ if(k!==null && k!==undefined) pos[k] = {c,i}; }));
+  return pos;
+}
+// 決勝は勝ち上がりの関係から判定する（勝ち上がり元より前＝赤、直後＝連戦でオレンジ）
+function computeBracketConflicts(lists){
+  const res = {};
+  const add = (k, level, msg)=>{
+    const r = res[k] || (res[k] = {level:'orange', msgs:[]});
+    if(level==='red') r.level = 'red';
+    if(!r.msgs.includes(msg)) r.msgs.push(msg);
+  };
+  const pos = bracketPositions(lists);
+  bracketPlayedList().forEach(item=>{
+    const p = pos[item.key]; if(!p) return;
+    item.feeders.forEach(f=>{
+      const q = pos[f]; if(!q) return;
+      if(p.i<=q.i) add(item.key,'red',`${bracketMatchLabel(f)}と同じ時間か、それより前に組まれています`);
+      else if(p.i===q.i+1) add(item.key,'orange',`${bracketMatchLabel(f)}の直後です（勝ち上がったチームが連戦になります）`);
+    });
+  });
+  return res;
+}
+function bracketSideText(item, m, side){
+  const v = m[side];
+  if(v===null || v===undefined){
+    const f = item && (item.side ? item.side[side] : item.feeders[side==='a'?0:1]);
+    if(!f) return '（未定）';
+    return `${bracketMatchLabel(f)}の${item.key==='tp'?'敗者':'勝者'}`;
+  }
+  if(v==='BYE') return 'シード';
+  return teamName(v);
+}
+function renderBracketTable(){
+  const box = el(`<div></div>`);
+  const lists = getBracketLists();
+  const conflicts = computeBracketConflicts(lists);
+  const items = {}; bracketPlayedList().forEach(x=> items[x.key]=x);
+  const finalKey = `${state.bracket.rounds.length-1}-0`;
+  const nextKeys = new Set();
+  lists.forEach(l=>{
+    const k = l.find(k=>{ if(k===null||k===undefined) return false; const m=bracketMatchByKey(k); return m && !m.winner; });
+    if(k!==undefined) nextKeys.add(k);
+  });
+  const reds = Object.values(conflicts).filter(c=>c.level==='red').length;
+  box.appendChild(el(`
+    <div class="tt-legend">
+      <span><i style="background:var(--amber)"></i>次の試合</span>
+      <span><i style="background:#E5484D"></i>勝ち上がり元より前（要修正）</span>
+      <span><i style="background:#E08A1E"></i>連戦の注意</span>
+      <span>※ 勝者が決まっていない試合は「○○の勝者」と表示します</span>
+    </div>
+  `));
+  if(reds) box.appendChild(el(`<div class="cf-banner">⚠ 勝ち上がり元の試合より前に組まれている試合が${reds}件あります。赤い試合を後ろへ移動してください。</div>`));
+  const onChange = ()=>{ state.bracketScheduleEdited = true; render(); };
+  box.appendChild(renderSlotTable({
+    lists, cfg: state.bracketTime,
+    endLabel: '大会終了',
+    cellFor: (key,c,i)=>{
+      const m = bracketMatchByKey(key);
+      const item = items[key];
+      const cf = conflicts[key];
+      const cell = el(`<div class="tt-cell ${cf?'cf-'+cf.level:''} ${nextKeys.has(key)?'tt-next':''}"></div>`);
+      const decided = !!m.winner;
+      const aCls = decided ? (m.winner===m.a?'winner':'loser') : '';
+      const bCls = decided ? (m.winner===m.b?'winner':'loser') : '';
+      const aTbd = (m.a===null||m.a===undefined), bTbd = (m.b===null||m.b===undefined);
+      const row = el(`
+        <div class="match-row ${decided?'match-decided':''}">
+          <span class="tab rtag ${key===finalKey?'rtag-final':''}" style="padding:3px 9px;font-size:11px;cursor:default;">${escapeHtml(bracketMatchLabel(key))}</span>
+          <div class="match-team left ${aCls} ${aTbd?'tbd':''}">${escapeHtml(bracketSideText(item,m,'a'))}</div>
+          <span class="score-slot" data-side="a"></span><span class="vs">−</span><span class="score-slot" data-side="b"></span>
+          <div class="match-team ${bCls} ${bTbd?'tbd':''}">${escapeHtml(bracketSideText(item,m,'b'))}</div>
+        </div>
+      `);
+      const canScore = !m.forfeitWinner && m.a && m.b && m.a!=='BYE' && m.b!=='BYE' && !(bracketEditMode && key.startsWith('0-'));
+      const ik = key==='tp' ? 'bracket-tp' : `bracket-${key}`;
+      ['a','b'].forEach(side=>{
+        const slot = row.querySelector(`.score-slot[data-side="${side}"]`);
+        const prop = side==='a' ? 'scoreA' : 'scoreB';
+        if(m.forfeitWinner){ slot.replaceWith(el(`<span class="vs">${side==='a'?'不戦勝':''}</span>`)); return; }
+        const inp = el(`<input type="number" min="0" max="999" step="1" inputmode="numeric" pattern="[0-9]*" data-input-key="${ik}-${side}" value="${m[prop]===null||m[prop]===undefined?'':m[prop]}" ${canScore?'':'disabled'}>`);
+        inp.addEventListener('input', e=>{ m[prop] = clampScoreValue(e.target.value); propagateByes(); scheduleRender(); });
+        slot.replaceWith(inp);
+      });
+      row.appendChild(slotControls(lists, c, i, onChange));
+      cell.appendChild(row);
+      if(cf) cell.appendChild(conflictBox(cf));
+      return cell;
+    },
+  }));
+  return box;
+}
+// トーナメント表の各カードの上に出す「時刻・コート」
+function bracketWhenHtml(key, lists, tm){
+  const p = bracketPositions(lists)[key];
+  if(!p) return '';
+  const time = tm ? `<span class="when-t">${fmtHM(tm.times[p.i])}</span>` : `<span class="when-t">第${p.i+1}試合</span>`;
+  const court = lists.length>1 ? `<span class="when-c">${courtName(p.c)}</span>` : '';
+  return `<div class="bwhen">${time}${court}</div>`;
+}
 
 /* ============================= STANDINGS ============================= */
 function calcGroupStandings(groupIdx){
@@ -1243,7 +1931,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v5.6</div>
+        <div class="tag">Tournament Builder · v6.0</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -1695,14 +2383,17 @@ function renderPrelim(){
 
 function renderScheduleView(){
   const box = el(`<div></div>`);
+  box.appendChild(renderScheduleSettings('prelim'));
+  if(prelimUsesTable()){
+    box.appendChild(renderPrelimTable());
+    return box;
+  }
   const head = el(`
     <div class="row" style="justify-content:space-between;margin-bottom:10px;">
       <p class="small-note" style="margin:0;">① 同じグループの試合が連続しない　② グループ内では同じチームが連戦にならない　の2条件を考慮した順番です。</p>
-      <button class="btn-ghost btn-sm" id="reshuffleSchedule">🔀 スケジュールを組み直す</button>
     </div>
   `);
   box.appendChild(head);
-  head.querySelector('#reshuffleSchedule').addEventListener('click', ()=>{ buildSchedule(); render(); showToast('🔀 スケジュールを組み直しました'); });
 
   if(state.scheduleWarnings.length){
     const warn = el(`<div class="panel" style="margin-top:0;margin-bottom:14px;border-color:#EAC6C6;background:#FBEEEE;padding:14px 16px;"></div>`);
@@ -1914,6 +2605,8 @@ function generateBracket(){
     rounds.push(r);
   }
   state.bracket = { size:p, rounds, thirdPlaceMatch: (state.holdThirdPlace && rounds.length>=2) ? makeMatch(null,null) : null };
+  state.bracketSchedule = null;        // 組み合わせが変わったら時刻・コートの割り当ても作り直す
+  state.bracketScheduleEdited = false;
   state.savedThisTournament = false;
   propagateByes();
 }
@@ -2255,6 +2948,7 @@ function renderBracket(){
         <button class="btn-ghost btn-sm" id="toggleEdit">${bracketEditMode?'編集を終える':'✏️ 初戦の組み合わせを編集'}</button>
         <button class="btn-ghost btn-sm" id="reseedBtn">🔀 シードを組み直す</button>
       </div>
+      <div id="bracketSchedArea"></div>
       <div class="bracket-wrap" id="bracketArea"></div>
       <div id="championArea"></div>
       <div class="footer-nav">
@@ -2264,6 +2958,30 @@ function renderBracket(){
     </div>
   `);
   const area = wrap.querySelector('#bracketArea');
+  // ---- v6.0: コート・タイムスケジュールの設定とタブ ----
+  const schedArea = wrap.querySelector('#bracketSchedArea');
+  schedArea.appendChild(renderScheduleSettings('bracket'));
+  const useSched = bracketUsesSchedule();
+  let schedLists = null, schedTm = null;
+  if(useSched){
+    schedLists = getBracketLists();
+    schedTm = computeSlotTimes(state.bracketTime, maxSlots(schedLists));
+    const notes = [];
+    if(state.prelimTime && state.prelimTime.enabled && state.matches.length){
+      const ptm = computeSlotTimes(state.prelimTime, maxSlots(getCourtLists()));
+      if(ptm) notes.push(`予選終了 ${fmtHM(ptm.end)}`);
+    }
+    notes.push('1回戦から順に割り当て、同じチームが連戦にならないよう、前の試合から1枠以上あけています。');
+    schedArea.appendChild(el(`<p class="small-note" style="margin:2px 0 12px;">${escapeHtml(notes.join(' ／ '))}</p>`));
+    const tabs = el(`<div class="tabbar"><div class="tab ${bracketView==='tree'?'active':''}" data-v="tree">🏆 トーナメント表</div><div class="tab ${bracketView==='time'?'active':''}" data-v="time">🕒 タイムスケジュール</div></div>`);
+    tabs.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=>{ bracketView = t.dataset.v; render(); }));
+    schedArea.appendChild(tabs);
+    if(bracketView==='time'){
+      area.classList.remove('bracket-wrap');
+      area.appendChild(renderBracketTable());
+    }
+  }
+  const showTree = !useSched || bracketView!=='time';
   const bracketEl = el(`<div class="bracket"></div>`);
   const rounds = state.bracket.rounds;
   const roundNames = rounds.map((_,i)=>{
@@ -2278,6 +2996,7 @@ function renderBracket(){
     const col = el(`<div class="round-col"><div class="round-title">${roundNames[ri]}</div></div>`);
     round.forEach((m, mi)=>{
       const box = el(`<div class="bmatch"></div>`);
+      if(useSched){ const w = bracketWhenHtml(`${ri}-${mi}`, schedLists, schedTm); if(w) box.appendChild(el(w)); }
       const canScore = !(ri===0 && bracketEditMode) && !m.forfeitWinner && m.a && m.b && m.a!=='BYE' && m.b!=='BYE';
       let scoreAInput=null, scoreBInput=null;
       if(canScore){
@@ -2310,13 +3029,14 @@ function renderBracket(){
     });
     bracketEl.appendChild(col);
   });
-  area.appendChild(bracketEl);
+  if(showTree) area.appendChild(bracketEl);
 
   // 3位決定戦
-  if(state.bracket.thirdPlaceMatch){
+  if(showTree && state.bracket.thirdPlaceMatch){
     const m3 = state.bracket.thirdPlaceMatch;
     const tpWrap = el(`<div style="margin-top:18px;max-width:260px;"><div class="round-title">3位決定戦</div></div>`);
     const box = el(`<div class="bmatch"></div>`);
+    if(useSched){ const w = bracketWhenHtml('tp', schedLists, schedTm); if(w) box.appendChild(el(w)); }
     const canScore = !m3.forfeitWinner && m3.a && m3.b;
     let scoreAInput=null, scoreBInput=null;
     if(canScore){
@@ -2456,6 +3176,7 @@ function drawBracketConnectors(panelEl){
 }
 
 let bracketEditMode = false;
+let bracketView = 'tree'; // 'tree' | 'time'
 function renderSlot(m, side, ri, mi, scoreInputEl){
   const val = m[side];
   const w = m.winner;
