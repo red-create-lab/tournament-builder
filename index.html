@@ -186,6 +186,49 @@
     input[type=text],input[type=number],select,button{min-height:38px;}
     input[type=number]{min-height:40px;}
   }
+  /* ---- v6.2: 部分総当たり ---- */
+  .partial-cfg{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;background:#FDF6E8;border:1px solid #F0D9AE;border-radius:12px;padding:12px 16px;margin:14px 0;}
+  .partial-cfg label{font-size:13px;font-weight:800;}
+  .partial-cfg select{font-size:14px;font-weight:800;padding:6px 10px;}
+  .partial-cfg .note{font-size:12px;color:var(--sub);}
+  .partial-banner{background:#FDF0D8;border:1px solid #F0D9AE;color:#8A5A10;font-size:12.5px;font-weight:700;border-radius:10px;padding:9px 14px;margin-bottom:10px;}
+  .linklike{background:none;border:none;color:#8A5A10;text-decoration:underline;font-weight:800;font-size:12.5px;padding:0;cursor:pointer;}
+  .partial-two{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start;margin:4px 0 6px;}
+  .partial-h{font-size:14px;font-weight:800;margin:0 0 8px;}
+  .partial-mx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.partial-mx{border-collapse:separate;border-spacing:3px;font-size:12px;}
+  table.partial-mx th{font-size:11px;color:var(--navy-2);font-weight:800;padding:2px 4px;white-space:nowrap;}
+  table.partial-mx th.nm{text-align:right;}
+  table.partial-mx td{width:28px;height:26px;text-align:center;border-radius:6px;background:#F1F3F7;font-weight:800;}
+  table.partial-mx td.on{background:var(--navy);color:#fff;}
+  table.partial-mx td.self{background:transparent;color:#C4CCDA;}
+  table.partial-mx td.cnt{background:transparent;color:var(--win);width:44px;white-space:nowrap;}
+  table.partial-mx td.hl{box-shadow:inset 0 0 0 2px var(--amber);}
+  .partial-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;}
+  .partial-card{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid #E5EAF2;border-radius:10px;padding:8px 10px;font-size:13.5px;font-weight:700;}
+  .partial-card .no{font-size:11px;color:var(--sub);font-weight:800;min-width:20px;}
+  .partial-card .vs{color:var(--sub);font-weight:600;font-size:12px;}
+  .partial-card .tn{overflow-wrap:anywhere;}
+  .partial-swap{font-size:11px;font-weight:800;padding:4px 9px;border-radius:7px;background:#fff;border:1.5px solid #C7D0E0;color:var(--navy);white-space:nowrap;}
+  .partial-swap:disabled{cursor:default;}
+  .partial-card.sel{background:#FDF0D8;border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber);}
+  .partial-card.can{border-color:#9CC8AF;background:#F1F8F4;}
+  .partial-card.can .partial-swap{border-color:var(--win);color:var(--win);}
+  .partial-card.no-go{opacity:.4;}
+  .partial-overlay{position:fixed;inset:0;background:rgba(18,33,58,.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;}
+  .partial-dlg{background:#fff;border-radius:16px;padding:22px 24px;width:100%;max-width:480px;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+  .partial-dlg h3{margin:0 0 4px;font-size:16px;}
+  .partial-dlg p{margin:0 0 14px;font-size:12.5px;color:var(--sub);}
+  .partial-dlg .before{font-size:12.5px;background:#F1F3F7;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-weight:700;}
+  .partial-opt{display:block;width:100%;text-align:left;border:1.5px solid #D3DAE6;border-radius:10px;padding:11px 14px;margin-bottom:8px;background:#fff;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .partial-opt b{color:var(--navy);}
+  .partial-opt .k{font-size:11px;color:var(--sub);font-weight:800;margin-right:8px;}
+  .partial-opt.ok{border-color:var(--win);background:#F1F8F4;cursor:pointer;}
+  .partial-opt.ok:hover{background:#E4F2EA;}
+  .partial-opt.ng{opacity:.45;}
+  .partial-opt .why{display:block;font-size:11px;color:var(--lose);font-weight:700;margin-top:3px;}
+  @media (max-width:760px){ .partial-two{grid-template-columns:1fr;} }
+  body.readonly-mode .partial-swap, body.readonly-mode .partial-cfg button{display:none;}
   /* ---- v6.0: コート・タイムスケジュール ---- */
   .sched-settings{background:var(--paper);border:1px solid #E5EAF2;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;}
   .sched-row{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;}
@@ -211,7 +254,7 @@
   .tt-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
   .cf-banner{background:#FDECEC;border:1px solid #F3C4C4;color:#B42318;font-size:12.5px;font-weight:700;border-radius:10px;padding:10px 14px;margin-bottom:10px;}
   .tt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--paper);border:1px solid #E5EAF2;border-radius:12px;padding:4px 10px;}
-  table.tt{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;}
+  table.tt{width:100%;border-collapse:separate;border-spacing:0;min-width:820px;table-layout:fixed;}
   table.tt.tt-single{min-width:520px;}
   table.tt th{font-size:12px;color:var(--navy-2);text-align:left;padding:10px 8px;border-bottom:2px solid #E5EAF2;font-weight:800;}
   table.tt td{padding:6px 4px;border-bottom:1px solid #EDF0F5;vertical-align:middle;}
@@ -222,7 +265,7 @@
   .tt-cell{border-radius:8px;}
   .tt-cell .match-row{border-bottom:none;padding:6px 6px;gap:6px;font-size:13px;}
   .tt-cell .match-row input[type=number]{width:46px;padding:6px 2px;}
-  .tt-cell .match-team{white-space:normal;min-width:3.5em;line-height:1.3;overflow-wrap:anywhere;}
+  .tt-cell .match-team{white-space:normal;min-width:5em;line-height:1.3;overflow-wrap:anywhere;}
   .tt-cell.tt-next{background:#FDF6E8;box-shadow:inset 3px 0 0 var(--amber);}
   .tt-cell.cf-orange{background:#FDF1E0;box-shadow:inset 3px 0 0 #E08A1E;}
   .tt-cell.cf-red{background:#FDECEC;box-shadow:inset 3px 0 0 #E5484D;}
@@ -295,10 +338,16 @@ let state = {
   bracketSchedule: null,     // 決勝：コートごとの試合キーの並び [["0-1"|"tp"|null,...], ...]
   bracketScheduleEdited: false,
   bracketTime: {enabled:false, start:'', duration:15, breaks:[]},
+  // ---- v6.2: 部分総当たり（1グループのときだけ） ----
+  matchesPerTeam: null,      // 1チームあたりの試合数（null＝全チームと対戦）
+  partialPairs: [],          // 対戦の組み合わせ [{a, b}, ...]（Firestore対策で配列の配列にしない）
 };
 function defaultPrelimTime(){ return {enabled:false, start:'10:00', duration:15, breaks:[]}; }
 function defaultBracketTime(){ return {enabled:false, start:'', duration:15, breaks:[]}; }
+// v6.0〜の大会設定（コート・タイムスケジュール・部分総当たり）を初期状態に戻す
 function resetCourtTimeState(){
+  state.matchesPerTeam = null;
+  state.partialPairs = [];
   state.prelimCourts = 1;
   state.courtSchedule = [];
   state.courtScheduleEdited = false;
@@ -400,7 +449,8 @@ const SYNCED_FIELDS = [
   'savedThisTournament','holdThirdPlace','withdrawnTeams','nextTeamId','nextMatchId',
   'viewToken',
   'prelimCourts','courtSchedule','courtScheduleEdited','prelimTime',
-  'bracketCourts','bracketSchedule','bracketScheduleEdited','bracketTime'
+  'bracketCourts','bracketSchedule','bracketScheduleEdited','bracketTime',
+  'matchesPerTeam','partialPairs'
 ];
 // Firestoreは「配列の中に配列」を保存できないため、コート別の並びも包んで保存する
 function wrapLists(lists, key){ return Array.isArray(lists) ? lists.map(l=>({[key]: (l||[]).map(x=> x===undefined ? null : x)})) : null; }
@@ -523,6 +573,8 @@ function applyRemoteSnapshot(data){
   if(!state.bracketTime) state.bracketTime = defaultBracketTime();
   if(!state.prelimCourts) state.prelimCourts = 1;
   if(!state.bracketCourts) state.bracketCourts = 1;
+  if(data.matchesPerTeam===undefined) state.matchesPerTeam = null;
+  if(!Array.isArray(state.partialPairs)) state.partialPairs = [];
   if(data.nextTeamId!==undefined) nextTeamId = data.nextTeamId;
   if(data.nextMatchId!==undefined) nextMatchId = data.nextMatchId;
   render();
@@ -680,6 +732,7 @@ function scheduleAutosave(){
       holdThirdPlace: state.holdThirdPlace,
       prelimCourts: state.prelimCourts, courtSchedule: state.courtSchedule, courtScheduleEdited: state.courtScheduleEdited, prelimTime: state.prelimTime,
       bracketCourts: state.bracketCourts, bracketSchedule: state.bracketSchedule, bracketScheduleEdited: state.bracketScheduleEdited, bracketTime: state.bracketTime,
+      matchesPerTeam: state.matchesPerTeam, partialPairs: state.partialPairs,
       stage:(state.stage==='history'||state.stage==='withdraw') ? state.previousStage : state.stage,
       nextTeamId, nextMatchId,
       savedAt: new Date().toISOString(),
@@ -717,6 +770,8 @@ function restoreSnapshot(snap){
   state.bracketSchedule = snap.bracketSchedule || null;
   state.bracketScheduleEdited = !!snap.bracketScheduleEdited;
   state.bracketTime = snap.bracketTime || defaultBracketTime();
+  state.matchesPerTeam = snap.matchesPerTeam || null;
+  state.partialPairs = Array.isArray(snap.partialPairs) ? snap.partialPairs : [];
   state.stage = snap.stage || 'setup';
   state.previousStage = state.stage;
   nextTeamId = snap.nextTeamId || ((Math.max(0,...(snap.teams||[]).map(t=>t.id)))+1);
@@ -1157,6 +1212,8 @@ function computePrelimConflicts(lists, slotLabel){
       [[-1,'直前'],[1,'直後']].forEach(([d,word])=>{
         const j = i+d; if(j<0 || j>=n) return;
         lists.forEach((l2,c2)=>{
+          // 同じコート内の連戦は、チーム数が少ないグループでは避けられないことが多いので行には出さず、件数だけ上に表示する
+          if(c2===c) return;
           const o = l2[j]; if(o===null || o===undefined) return;
           teamsOf(o).forEach(t=>{ if(mine.includes(t)) add(id,'orange',`${teamName(t)}：${word}（${courtName(c2)} ${slotLabel(j)}）にも出場（連戦）`); });
         });
@@ -1164,6 +1221,20 @@ function computePrelimConflicts(lists, slotLabel){
     });
   }
   return res;
+}
+
+// 同じコートの中で、前後の試合に同じチームが出ている件数（グループ単位で数える）
+function countSameCourtConsecutive(lists){
+  const byGroup = {};
+  lists.forEach(l=>{
+    for(let i=1;i<l.length;i++){
+      const a = l[i-1]!=null ? matchById(l[i-1]) : null;
+      const b = l[i]!=null ? matchById(l[i]) : null;
+      if(!a || !b) continue;
+      if([a.a,a.b].some(t=>t===b.a || t===b.b)) byGroup[b.groupIdx] = (byGroup[b.groupIdx]||0)+1;
+    }
+  });
+  return byGroup;
 }
 
 /* ---- 手動調整 ---- */
@@ -1369,11 +1440,20 @@ function renderPrelimTable(){
     <div class="tt-legend">
       <span><i style="background:var(--amber)"></i>次の試合</span>
       <span><i style="background:#E5484D"></i>同じ時間に重複（要修正）</span>
-      <span><i style="background:#E08A1E"></i>連戦の注意</span>
+      ${lists.length>1?'<span><i style="background:#E08A1E"></i>コートをまたいだ連戦</span>':''}
       ${lists.length>1?'<span>※ 同じ行が同じ時間帯です。「↑↓」で順番、「⇄」でコートを移動できます</span>':'<span>※「↑↓」で順番を入れ替えられます</span>'}
     </div>
   `));
   if(reds) box.appendChild(el(`<div class="cf-banner">⚠ 同じ時間に同じチームが2つのコートに入っている試合が${reds}件あります。赤い試合を移動してください。</div>`));
+  const same = countSameCourtConsecutive(lists);
+  const sameKeys = Object.keys(same).map(Number).sort((x,y)=>x-y);
+  if(sameKeys.length){
+    const lines = sameKeys.map(gi=>{
+      const g = state.groups.length>1 ? `グループ${String.fromCharCode(65+gi)}` : '全体';
+      return `⚠ ${g}：同じコートで${same[gi]}件の連戦があります（チーム数が少ないグループでは避けられない場合があります）。`;
+    });
+    box.appendChild(el(`<div class="panel" style="margin-top:0;margin-bottom:10px;border-color:#EAC6C6;background:#FBEEEE;padding:10px 14px;">${lines.map(t=>`<p class="small-note" style="color:var(--lose);margin:3px 0;">${escapeHtml(t)}</p>`).join('')}</div>`));
+  }
   const onChange = ()=>{
     state.courtScheduleEdited = true;
     if(lists.length===1) state.schedule = lists[0].filter(x=>x!==null);
@@ -1446,8 +1526,17 @@ function buildBracketSchedule(){
     // 決勝は3位決定戦のあと、Aコートで単独で行う
     if(isFinal && slotOf.tp!==undefined) earliest = Math.max(earliest, slotOf.tp+1);
     for(let s=earliest; s<10000; s++){
-      const c = isFinal ? ((lists[0][s]===undefined || lists[0][s]===null) ? 0 : -1)
-                        : lists.findIndex(l=> l[s]===undefined || l[s]===null);
+      // 空いているコートが複数あるときは、それまでの試合数が少ないコートを優先（同数ならA→B→…の順）
+      let c = -1;
+      if(isFinal){ c = (lists[0][s]===undefined || lists[0][s]===null) ? 0 : -1; }
+      else {
+        let best = Infinity;
+        lists.forEach((l,ci)=>{
+          if(l[s]!==undefined && l[s]!==null) return;
+          const used = l.filter(x=>x!==null && x!==undefined).length;
+          if(used<best){ best = used; c = ci; }
+        });
+      }
       if(c>-1){
         while(lists[c].length<s) lists[c].push(null);
         lists[c][s] = item.key; slotOf[item.key] = s;
@@ -1931,7 +2020,7 @@ function renderBoard(){
   const board = el(`
     <div class="board">
       <div>
-        <div class="tag">Tournament Builder · v6.0</div>
+        <div class="tag">Tournament Builder · v6.2</div>
         <h1>${escapeHtml(titleText)}</h1>
         <div id="autosaveIndicator" style="font-size:11px;color:#9FB0CC;margin-top:4px;"></div>
       </div>
@@ -2213,6 +2302,7 @@ function renderGroups(){
         <select id="groupCount"></select>
         <button class="btn-ghost btn-sm" id="reshuffleBtn">🔀 ランダム再振り分け</button>
       </div>
+      <div id="partialArea"></div>
       <div class="group-grid" id="groupGrid"></div>
       <div class="footer-nav">
         <button class="btn-ghost" id="backToSetup">← チーム編集に戻る</button>
@@ -2234,6 +2324,9 @@ function renderGroups(){
     render();
   });
   wrap.querySelector('#reshuffleBtn').addEventListener('click', ()=>{ autoAssignGroups(); render(); showToast('🔀 チームを再振り分けしました'); });
+  wrap.querySelector('#partialArea').appendChild(renderPartialArea());
+  // 部分総当たりのときは、下のチーム一覧（1グループ）は対戦表と重複するので出さない
+  if(usesPartial()) wrap.querySelector('#groupGrid').style.display = 'none';
 
   const grid = wrap.querySelector('#groupGrid');
   state.groups.forEach((teamIds, gi)=>{
@@ -2279,9 +2372,212 @@ function renderGroups(){
   return wrap;
 }
 
+/* ---- v6.2: 部分総当たり（1グループで、全員とは当たらない総当たり） ---- */
+// 全チームの試合数がそろう試合数だけを選択肢にする（チーム数×試合数が偶数）
+function partialOptions(n){ const out=[]; for(let k=1;k<=n-1;k++) if((n*k)%2===0) out.push(k); return out; }
+function usesPartial(){
+  if(state.groups.length!==1) return false;
+  const n = (state.groups[0]||[]).length;
+  const k = Number(state.matchesPerTeam)||0;
+  return n>=4 && k>=1 && k<n-1 && (n*k)%2===0;
+}
+const pairKey = (a,b)=> a<b ? `${a}-${b}` : `${b}-${a}`;
+// 全員がk試合・同じ相手とは1回だけ、になる組み合わせを作る（円形に並べて近い相手と組み、ランダムに組み替えて偏りをなくす）
+function buildPartialPairs(teamIds, k){
+  const n = teamIds.length;
+  const ids = shuffle(teamIds.slice());
+  const set = new Set(), pairs = [];
+  const add = (i,j)=>{ const a=ids[i], b=ids[j]; const key=pairKey(a,b); if(a!==b && !set.has(key)){ set.add(key); pairs.push({a,b}); } };
+  for(let d=1; d<=Math.floor(k/2); d++) for(let i=0;i<n;i++) add(i,(i+d)%n);
+  if(k%2===1) for(let i=0;i<n/2;i++) add(i, i+n/2);
+  for(let t=0;t<n*k*4;t++){
+    const p = Math.floor(Math.random()*pairs.length), q = Math.floor(Math.random()*pairs.length);
+    if(p===q) continue;
+    const opts = partialSwapOptions(pairs, pairs[p], pairs[q]).filter(o=>o.ok);
+    if(!opts.length) continue;
+    const o = opts[Math.floor(Math.random()*opts.length)];
+    applyPartialSwap(pairs, set, p, q, o);
+  }
+  return pairs;
+}
+// 2つの対戦（4チーム）の相手の組み替え方は2通り。すでにある対戦と重ならない案だけが選べる
+function partialSwapOptions(pairs, p, q){
+  const four = [p.a,p.b,q.a,q.b];
+  if(new Set(four).size<4) return [];
+  const existing = new Set(pairs.map(x=>pairKey(x.a,x.b)));
+  return [
+    {x:{a:p.a,b:q.a}, y:{a:p.b,b:q.b}},
+    {x:{a:p.a,b:q.b}, y:{a:p.b,b:q.a}},
+  ].map(o=>({...o, ok: !existing.has(pairKey(o.x.a,o.x.b)) && !existing.has(pairKey(o.y.a,o.y.b))}));
+}
+function applyPartialSwap(pairs, set, pi, qi, o){
+  const p = pairs[pi], q = pairs[qi];
+  if(set){ set.delete(pairKey(p.a,p.b)); set.delete(pairKey(q.a,q.b)); set.add(pairKey(o.x.a,o.x.b)); set.add(pairKey(o.y.a,o.y.b)); }
+  pairs[pi] = {a:o.x.a, b:o.x.b};
+  pairs[qi] = {a:o.y.a, b:o.y.b};
+}
+function partialPairsValid(teamIds, k, pairs){
+  if(!Array.isArray(pairs) || pairs.length!==teamIds.length*k/2) return false;
+  const inGroup = new Set(teamIds), deg = {}, seen = new Set();
+  for(const p of pairs){
+    if(!p || !inGroup.has(p.a) || !inGroup.has(p.b) || p.a===p.b) return false;
+    const key = pairKey(p.a,p.b); if(seen.has(key)) return false; seen.add(key);
+    deg[p.a]=(deg[p.a]||0)+1; deg[p.b]=(deg[p.b]||0)+1;
+  }
+  return teamIds.every(id=>deg[id]===k);
+}
+// 保存されている組み合わせがチームの増減などで合わなくなっていれば作り直す
+function ensurePartialPairs(){
+  const ids = state.groups[0] || [];
+  const k = Number(state.matchesPerTeam);
+  if(!partialPairsValid(ids, k, state.partialPairs)) state.partialPairs = buildPartialPairs(ids, k);
+  return state.partialPairs;
+}
+// 対戦カードは、チーム番号順（登録順）にそろえて見やすくする
+function sortedPartialView(){
+  const order = {}; state.teams.forEach((t,i)=>order[t.id]=i);
+  return state.partialPairs.map((p,idx)=>{
+    const [a,b] = order[p.a]<=order[p.b] ? [p.a,p.b] : [p.b,p.a];
+    return {idx, a, b};
+  }).sort((x,y)=> order[x.a]-order[y.a] || order[x.b]-order[y.b]);
+}
+// 2チームを登録順に並べて「A vs B」の文字にする
+function pairText(a,b){ const ia=state.teams.findIndex(t=>t.id===a), ib=state.teams.findIndex(t=>t.id===b); const [x,y]= ia<=ib?[a,b]:[b,a]; return `${escapeHtml(teamName(x))} vs ${escapeHtml(teamName(y))}`; }
+let partialSwapSel = null; // 入れ替えで最初に選んだ対戦（state.partialPairsの添字）
+
+function renderPartialArea(){
+  const ids = state.groups[0] || [];
+  const n = ids.length;
+  const box = el(`<div></div>`);
+  if(state.groups.length!==1 || n<4) return box;
+  const opts = partialOptions(n);
+  const full = n-1;
+  const cur = usesPartial() ? Number(state.matchesPerTeam) : full;
+  const partialList = opts.filter(k=>k<full);
+  const optText = opts.map(k=> k===full ? `${k}試合（全チームと対戦）` : `${k}試合`).join('・');
+  const cfg = el(`
+    <div class="partial-cfg">
+      <label>1チームあたりの試合数</label>
+      <select>${opts.map(k=>`<option value="${k}" ${k===cur?'selected':''}>${k===full?`${k}試合（全チームと対戦）`:`${k}試合`}</option>`).join('')}</select>
+      <span class="note">${n}チームのため、全チームの試合数がそろう ${escapeHtml(opts.join('・'))}試合から選べます。<b>全${n*cur/2}試合</b></span>
+      <span style="flex:1"></span>
+      ${usesPartial()?'<button class="btn-ghost btn-sm" data-k="regen">🔀 組み合わせを作り直す</button>':''}
+    </div>
+  `);
+  cfg.querySelector('select').addEventListener('change', e=>{
+    if(!requireEditPermission()){ render(); return; }
+    const k = Number(e.target.value);
+    state.matchesPerTeam = k>=full ? null : k;
+    state.partialPairs = usesPartial() ? buildPartialPairs(ids, k) : [];
+    partialSwapSel = null;
+    render();
+  });
+  const regen = cfg.querySelector('[data-k="regen"]');
+  if(regen) regen.addEventListener('click', ()=>{
+    if(!requireEditPermission()) return;
+    state.partialPairs = buildPartialPairs(ids, Number(state.matchesPerTeam));
+    partialSwapSel = null;
+    render(); showToast('🔀 組み合わせを作り直しました');
+  });
+  box.appendChild(cfg);
+  if(!partialList.length && !usesPartial()) return box;
+  if(!usesPartial()) return box;
+
+  const pairs = ensurePartialPairs();
+  const k = Number(state.matchesPerTeam);
+  const sel = partialSwapSel!==null && pairs[partialSwapSel] ? pairs[partialSwapSel] : null;
+  if(!sel) partialSwapSel = null;
+  if(sel){
+    const ban = el(`<div class="partial-banner">「${pairText(sel.a,sel.b)}」と入れ替えるカードを選んでください。緑のカードが入れ替えられる相手です（同じ相手と2回当たる組み合わせになるカードは選べません）。　<button class="linklike">キャンセル</button></div>`);
+    ban.querySelector('button').addEventListener('click', ()=>{ partialSwapSel = null; render(); });
+    box.appendChild(ban);
+  }
+
+  // 対戦表（マトリクス）
+  const has = new Set(pairs.map(p=>pairKey(p.a,p.b)));
+  const deg = {}; pairs.forEach(p=>{ deg[p.a]=(deg[p.a]||0)+1; deg[p.b]=(deg[p.b]||0)+1; });
+  const teamOrder = state.teams.map(t=>t.id).filter(id=>ids.includes(id));
+  const hlKey = sel ? pairKey(sel.a,sel.b) : null;
+  const mx = `
+    <div class="partial-mx-wrap"><table class="partial-mx">
+      <tr><th></th>${teamOrder.map((_,i)=>`<th>${i+1}</th>`).join('')}<th></th></tr>
+      ${teamOrder.map((a,ri)=>`<tr><th class="nm">${ri+1}. ${escapeHtml(teamName(a))}</th>${teamOrder.map(b=>{
+        if(a===b) return '<td class="self">—</td>';
+        const key = pairKey(a,b), on = has.has(key);
+        return `<td class="${on?'on':''} ${key===hlKey?'hl':''}">${on?'●':''}</td>`;
+      }).join('')}<td class="cnt">${deg[a]||0}試合</td></tr>`).join('')}
+    </table></div>`;
+
+  // 対戦カード
+  const view = sortedPartialView();
+  const cards = el(`<div class="partial-cards"></div>`);
+  view.forEach((v,i)=>{
+    const p = pairs[v.idx];
+    let cls = '', label = '⇄ 入れ替え', clickable = true;
+    if(sel){
+      if(v.idx===partialSwapSel){ cls='sel'; label='選択中'; }
+      else if(partialSwapOptions(pairs, sel, p).some(o=>o.ok)){ cls='can'; label='ここと入れ替え'; }
+      else { cls='no-go'; label='—'; clickable=false; }
+    }
+    const c = el(`<div class="partial-card ${cls}"><span class="no">${i+1}</span><span class="tn">${escapeHtml(teamName(v.a))}</span><span class="vs">vs</span><span class="tn">${escapeHtml(teamName(v.b))}</span><span style="flex:1"></span><button class="partial-swap" ${clickable?'':'disabled'}>${label}</button></div>`);
+    c.querySelector('button').addEventListener('click', ()=>{
+      if(!requireEditPermission()) return;
+      if(!sel){ partialSwapSel = v.idx; render(); return; }
+      if(v.idx===partialSwapSel){ partialSwapSel = null; render(); return; }
+      showPartialSwapModal(partialSwapSel, v.idx);
+    });
+    cards.appendChild(c);
+  });
+
+  const two = el(`
+    <div class="partial-two">
+      <div><p class="partial-h">対戦表</p>${mx}<p class="small-note" style="margin-top:6px;">● が対戦あり。全チーム${k}試合ずつです。</p></div>
+      <div><p class="partial-h">対戦カード（全${pairs.length}試合）</p></div>
+    </div>
+  `);
+  two.children[1].appendChild(cards);
+  box.appendChild(two);
+  return box;
+}
+function showPartialSwapModal(pi, qi){
+  const pairs = state.partialPairs;
+  const p = pairs[pi], q = pairs[qi];
+  const opts = partialSwapOptions(pairs, p, q);
+  const tn = id=>escapeHtml(teamName(id));
+  const overlay = el(`
+    <div class="partial-overlay">
+      <div class="partial-dlg">
+        <h3>⇄ 対戦相手を入れ替える</h3>
+        <p>4チームとも試合数は変わりません。どちらの組み合わせにしますか？</p>
+        <div class="before">いまの対戦：${pairText(p.a,p.b)}　／　${pairText(q.a,q.b)}</div>
+        ${opts.map((o,i)=>`<button class="partial-opt ${o.ok?'ok':'ng'}" data-i="${i}" ${o.ok?'':'disabled'}><span class="k">案${i+1}</span><b>${pairText(o.x.a,o.x.b)}</b>　／　<b>${pairText(o.y.a,o.y.b)}</b>${o.ok?'':'<span class="why">すでに対戦がある組み合わせになるため選べません</span>'}</button>`).join('')}
+        <div style="display:flex;justify-content:flex-end;margin-top:6px;"><button class="btn-ghost btn-sm" data-k="cancel">キャンセル</button></div>
+      </div>
+    </div>
+  `);
+  const close = ()=> overlay.remove();
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  overlay.querySelector('[data-k="cancel"]').addEventListener('click', close);
+  overlay.querySelectorAll('.partial-opt.ok').forEach(b=> b.addEventListener('click', ()=>{
+    applyPartialSwap(pairs, null, pi, qi, opts[Number(b.dataset.i)]);
+    partialSwapSel = null;
+    close(); render(); showToast('⇄ 対戦相手を入れ替えました');
+  }));
+  document.body.appendChild(overlay);
+}
+
 function generatePrelimMatches(){
   state.matches = [];
   state.manualOrder = {};
+  if(usesPartial()){
+    const ids = state.groups[0];
+    state.manualOrder[0] = ids.slice();
+    ensurePartialPairs().forEach(p=>{
+      state.matches.push({id: nextMatchId++, groupIdx: 0, a: p.a, b: p.b, scoreA:null, scoreB:null, forfeitWinner:null, forfeitCausedBy:null});
+    });
+    buildSchedule();
+    return;
+  }
   state.groups.forEach((teamIds, gi)=>{
     state.manualOrder[gi] = teamIds.slice();
     for(let i=0;i<teamIds.length;i++){
@@ -2459,7 +2755,7 @@ function renderGroupsView(){
     `));
   });
   standBox.appendChild(el(`<div class="table-scroll"></div>`)).appendChild(table);
-  standBox.appendChild(el(`<p class="small-note">勝ち3点・引き分け1点・負け0点の勝点で順位を決め、同点の場合は得失点差 → 直接対決の結果 → 総得点 の順で自動判定しています。</p>`));
+  standBox.appendChild(el(`<p class="small-note">勝ち3点・引き分け1点・負け0点の勝点で順位を決め、同点の場合は得失点差 → 直接対決の結果（対戦がない場合は省略） → 総得点 の順で自動判定しています。</p>`));
   box.appendChild(standBox);
   return box;
 }
